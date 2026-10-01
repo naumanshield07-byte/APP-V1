@@ -5,6 +5,75 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- MODE SELECTION -->
+    <LinearLayout
+        android:id="@+id/modeSelection"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:background="#090909"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:text="GTIN → WMS QR"
+            android:textColor="#8B0000"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:text="WAREHOUSE SCANNER"
+            android:textColor="#777777"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:gravity="center"
+            android:layout_marginTop="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/wmsModeButton"
+            android:text="📷  GTIN → WMS QR"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:backgroundTint="#8B0000"
+            android:minHeight="64dp"
+            android:layout_marginTop="50dp"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"/>
+
+        <Button
+            android:id="@+id/textQrModeButton"
+            android:text="🔤  GTIN → SAME QR"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:backgroundTint="#8B0000"
+            android:minHeight="64dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"/>
+
+        <TextView
+            android:text="OFFLINE WMS SCANNER"
+            android:textColor="#16A34A"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
     <!-- WMS HEADER -->
     <LinearLayout
         android:orientation="horizontal"

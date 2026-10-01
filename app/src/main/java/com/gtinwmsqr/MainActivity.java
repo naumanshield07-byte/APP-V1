@@ -31,20 +31,48 @@ import org.json.JSONArray; import org.json.JSONObject;
 import java.io.*; import java.util.*; import java.util.concurrent.*;
 
 public class MainActivity extends AppCompatActivity {
-    static final int REQ=1001; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; ImageAnalysis analysis; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    static final int REQ=1001; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
-    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build()); if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED) ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},REQ); else startCamera();}
+    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());showModeScreen();}
     void bind(){
         preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
+        modeSelection=findViewById(R.id.modeSelection);
+        wmsModeButton=findViewById(R.id.wmsModeButton);
+        textQrModeButton=findViewById(R.id.textQrModeButton);
+
+        wmsModeButton.setOnClickListener(v->{textQrMode=false;openScannerMode();});
+        textQrModeButton.setOnClickListener(v->{textQrMode=true;openScannerMode();});
+
         findViewById(R.id.findButton).setOnClickListener(v->find(input.getText().toString()));
         findViewById(R.id.againButton).setOnClickListener(v->{resultScroll.setVisibility(View.GONE);cameraCard.setVisibility(View.VISIBLE);manualPanel.setVisibility(View.GONE);notFound.setVisibility(View.GONE);startCamera();});
         findViewById(R.id.saveButton).setOnClickListener(v->saveQr()); findViewById(R.id.printButton).setOnClickListener(v->printQr());
         manualButton.setOnClickListener(v->{manualPanel.setVisibility(View.VISIBLE);input.requestFocus();((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(input,android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);});
         flashButton.setOnClickListener(v->toggleTorch());
     }
+    void showModeScreen(){
+        modeSelection.setVisibility(View.VISIBLE);
+        cameraCard.setVisibility(View.GONE);
+        manualPanel.setVisibility(View.GONE);
+        resultScroll.setVisibility(View.GONE);
+        status.setText("Select scanning mode");
+    }
+
+    void openScannerMode(){
+        modeSelection.setVisibility(View.GONE);
+        cameraCard.setVisibility(View.VISIBLE);
+        manualPanel.setVisibility(View.GONE);
+        resultScroll.setVisibility(View.GONE);
+
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},REQ);
+        } else {
+            startCamera();
+        }
+    }
+
     void loadCatalog(){try(InputStream is=getAssets().open("catalog.json")){String s=new String(readAll(is),java.nio.charset.StandardCharsets.UTF_8);JSONArray a=new JSONArray(s);for(int i=0;i<a.length();i++){Product p=new Product(a.getJSONObject(i));products.put(p.gtin.trim(),p);} }catch(Exception e){status.setText("Catalog load error: "+e.getMessage());}}
     byte[] readAll(InputStream i)throws IOException{ByteArrayOutputStream o=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=i.read(b))>0)o.write(b,0,n);return o.toByteArray();}
     void toggleTorch(){
