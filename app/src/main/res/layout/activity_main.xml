@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="#000000"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Simple yellow app bar: no Scan/Create/History/Settings tabs -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:background="#FFC107"
+        android:layout_width="match_parent"
+        android:layout_height="58dp">
+        <TextView
+            android:text="GTIN → WMS QR"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
+        <ImageButton
+            android:id="@+id/flashButton"
+            android:src="@android:drawable/ic_menu_camera"
+            android:contentDescription="Toggle flashlight"
+            android:background="@android:color/transparent"
+            android:tint="#FFFFFF"
+            android:padding="8dp"
+            android:layout_width="46dp"
+            android:layout_height="46dp"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/cameraCard"
+        android:background="#000000"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <com.gtinwmsqr.ScanFrameView
+            android:id="@+id/scanFrame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/cameraHint"
+            android:text="Scan product GTIN"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="#66000000"
+            android:padding="10dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="72dp"
+            android:layout_marginStart="80dp"
+            android:layout_marginEnd="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="#AA000000"
+            android:padding="8dp"
+            android:layout_gravity="bottom"
+            android:layout_width="match_parent"
+            android:layout_height="58dp">
+            <Button
+                android:id="@+id/manualButton"
+                android:text="⌨ Enter GTIN manually"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#FFC107"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/manualPanel"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/gtinInput"
+            android:hint="Enter / paste GTIN"
+            android:inputType="number"
+            android:singleLine="true"
+            android:textSize="17sp"
+            android:padding="12dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="52dp"/>
+        <Button
+            android:id="@+id/findButton"
+            android:text="Find"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:backgroundTint="#FFC107"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp"
+            android:layout_width="92dp"
+            android:layout_height="52dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/resultScroll"
+        android:fillViewport="true"
+        android:background="#F3F4F6"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/resultTitle"
+                android:text="Product found"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/productInfo"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:layout_marginTop="12dp"
+                android:lineSpacingExtra="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <ImageView
+                android:id="@+id/qrImage"
+                android:adjustViewBounds="true"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:layout_width="280dp"
+                android:layout_height="280dp"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/saveButton"
+                    android:text="↓ Save QR"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#FFC107"
+                    android:textColor="#FFFFFF"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"/>
+                <Button
+                    android:id="@+id/printButton"
+                    android:text="Print"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#FFC107"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"/>
+            </LinearLayout>
+            <Button
+                android:id="@+id/againButton"
+                android:text="📷 Scan Another GTIN"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:backgroundTint="#FFC107"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"/>
+            <TextView
+                android:id="@+id/notFoundText"
+                android:text="Product not found"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#991B1B"
+                android:visibility="gone"
+                android:layout_marginTop="14dp"
+                android:padding="16dp"
+                android:background="#FFFFFF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/statusText"
+        android:text="Opening camera…"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:background="#000000"
+        android:padding="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"/>
+</LinearLayout>
