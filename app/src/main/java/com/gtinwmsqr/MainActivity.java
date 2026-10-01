@@ -31,7 +31,7 @@ import org.json.JSONArray; import org.json.JSONObject;
 import java.io.*; import java.util.*; import java.util.concurrent.*;
 
 public class MainActivity extends AppCompatActivity {
-    static final int REQ=1001; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    static final int REQ=1001; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());showModeScreen();}
     void bind(){
@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         modeSelection=findViewById(R.id.modeSelection);
         wmsModeButton=findViewById(R.id.wmsModeButton);
         textQrModeButton=findViewById(R.id.textQrModeButton);
+        changeModeButton=findViewById(R.id.changeModeButton);
+
+        changeModeButton.setOnClickListener(v->showModeScreen());
 
         wmsModeButton.setOnClickListener(v->{textQrMode=false;openScannerMode();});
         textQrModeButton.setOnClickListener(v->{textQrMode=true;openScannerMode();});
@@ -53,10 +56,12 @@ public class MainActivity extends AppCompatActivity {
         flashButton.setOnClickListener(v->toggleTorch());
     }
     void showModeScreen(){
+        stopCamera();
         modeSelection.setVisibility(View.VISIBLE);
         cameraCard.setVisibility(View.GONE);
         manualPanel.setVisibility(View.GONE);
         resultScroll.setVisibility(View.GONE);
+        notFound.setVisibility(View.GONE);
         status.setText("Select scanning mode");
     }
 
@@ -85,5 +90,14 @@ public class MainActivity extends AppCompatActivity {
     Bitmap makeQr(String text,int size)throws WriterException{BitMatrix m=new MultiFormatWriter().encode(text,BarcodeFormat.QR_CODE,size,size);Bitmap b=Bitmap.createBitmap(size,size,Bitmap.Config.ARGB_8888);for(int y=0;y<size;y++)for(int x=0;x<size;x++)b.setPixel(x,y,m.get(x,y)?Color.BLACK:Color.WHITE);return b;}
     void saveQr(){if(last==null)return;Bitmap b;try{b=makeQr(last.wms,1000);}catch(Exception e){Toast.makeText(this,"QR generation failed: "+e.getMessage(),Toast.LENGTH_LONG).show();return;}String name="QR-"+last.wms+".png";ContentValues v=new ContentValues();v.put(MediaStore.Images.Media.DISPLAY_NAME,name);v.put(MediaStore.Images.Media.MIME_TYPE,"image/png");v.put(MediaStore.Images.Media.RELATIVE_PATH,"Pictures/GTIN-WMS-QR");try{android.net.Uri u=getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,v);try(OutputStream o=getContentResolver().openOutputStream(u)){b.compress(Bitmap.CompressFormat.PNG,100,o);}Toast.makeText(this,"QR saved to Pictures/GTIN-WMS-QR",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"Save failed: "+e.getMessage(),Toast.LENGTH_LONG).show();}}
     void printQr(){if(last==null)return;PrintManager pm=(PrintManager)getSystemService(PRINT_SERVICE);pm.print("GTIN-WMS-QR-"+last.wms,new QrPrintAdapter(this,qr.getDrawable()),new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build());}
+    @Override public void onBackPressed(){
+        if(modeSelection!=null && modeSelection.getVisibility()==View.VISIBLE){
+            super.onBackPressed();
+            return;
+        }
+
+        showModeScreen();
+    }
+
     @Override public void onRequestPermissionsResult(int r,@NonNull String[] p,@NonNull int[] g){super.onRequestPermissionsResult(r,p,g);if(r==REQ&&g.length>0&&g[0]==PackageManager.PERMISSION_GRANTED)startCamera();else status.setText("Camera permission denied. You can still enter a GTIN manually.");}
 }
