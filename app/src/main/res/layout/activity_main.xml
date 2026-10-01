@@ -125,7 +125,7 @@
         <EditText
             android:id="@+id/gtinInput"
             android:hint="Enter / paste GTIN"
-            android:hintTextColor="#777777"
+            android:textColorHint="#777777"
             android:textColor="#FFFFFF"
             android:inputType="number"
             android:singleLine="true"
