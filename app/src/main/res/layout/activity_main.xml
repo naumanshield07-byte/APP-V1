@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#090909"
+    android:background="#000000"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,65 +10,65 @@
         android:id="@+id/modeSelection"
         android:orientation="vertical"
         android:gravity="center"
+        android:background="#000000"
         android:padding="24dp"
-        android:background="#090909"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
         <TextView
-            android:text="GTIN → WMS QR"
-            android:textColor="#8B0000"
-            android:textSize="28sp"
+            android:text="QR GENERATOR"
+            android:textColor="#FFC107"
+            android:textSize="30sp"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#FFC107"
+            android:padding="18dp"
+            android:layout_marginTop="55dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/wmsModeButton"
+                android:text="GTIN → WMS QR"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="17sp"
+                android:backgroundTint="#FFC107"
+                android:minHeight="64dp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"/>
+
+            <Button
+                android:id="@+id/textQrModeButton"
+                android:text="GTIN → TEXT QR"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="17sp"
+                android:backgroundTint="#FFC107"
+                android:minHeight="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"/>
+
+        </LinearLayout>
+
         <TextView
-            android:text="WAREHOUSE SCANNER"
-            android:textColor="#777777"
+            android:text="SELECT SCANNING OPTION"
+            android:textColor="#FFC107"
             android:textSize="12sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
             android:gravity="center"
-            android:layout_marginTop="6dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/wmsModeButton"
-            android:text="📷  GTIN → WMS QR"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
-            android:backgroundTint="#8B0000"
-            android:minHeight="64dp"
-            android:layout_marginTop="50dp"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"/>
-
-        <Button
-            android:id="@+id/textQrModeButton"
-            android:text="🔤  GTIN → SAME QR"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
-            android:backgroundTint="#8B0000"
-            android:minHeight="64dp"
-            android:layout_marginTop="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"/>
-
-        <TextView
-            android:text="OFFLINE WMS SCANNER"
-            android:textColor="#16A34A"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="55dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -238,7 +238,7 @@
     <ScrollView
         android:id="@+id/resultScroll"
         android:fillViewport="true"
-        android:background="#090909"
+        android:background="#000000"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -246,7 +246,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:padding="16dp"
-            android:background="#090909"
+            android:background="#000000"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
