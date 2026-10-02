@@ -209,18 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 ocrDetected = true;
 
-                                runOnUiThread(() -> {
-
-                                    status.setText(
-                                        "OCR detected: " + cleaned
-                                    );
-
-                                    Toast.makeText(
-                                        this,
-                                        "Detected: " + cleaned,
-                                        Toast.LENGTH_LONG
-                                    ).show();
-                                });
+                                runOnUiThread(() -> showSameQrResult(cleaned));
                             }
                         }
 
@@ -230,6 +219,33 @@ public class MainActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> image.close());
             }
         );
+    }
+
+    void showSameQrResult(String text){
+        String cleaned = text.trim();
+
+        if(cleaned.isEmpty()) return;
+
+        stopCamera();
+
+        cameraCard.setVisibility(View.GONE);
+        manualPanel.setVisibility(View.GONE);
+        resultScroll.setVisibility(View.VISIBLE);
+        notFound.setVisibility(View.GONE);
+
+        info.setText(
+            "OCR text:\n" + cleaned +
+            "\n\nQR content:\n" + cleaned
+        );
+
+        try{
+            qr.setImageBitmap(makeQr(cleaned,800));
+            status.setText("QR generated successfully.");
+        }catch(Exception e){
+            status.setText("QR error: " + e.getMessage());
+        }
+
+        resultScroll.post(() -> resultScroll.requestFocus());
     }
 
     void showOcrPreview(String text){
