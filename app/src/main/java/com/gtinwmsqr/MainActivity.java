@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQ=1001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    LinearLayout ocrQrContainer;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
         textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
+        ocrQrContainer=findViewById(R.id.ocrQrContainer);
         modeSelection=findViewById(R.id.modeSelection);
         wmsModeButton=findViewById(R.id.wmsModeButton);
         textQrModeButton=findViewById(R.id.textQrModeButton);
@@ -81,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
         cameraCard.setVisibility(View.VISIBLE);
         manualPanel.setVisibility(View.GONE);
         resultScroll.setVisibility(View.GONE);
+
+        // Reset OCR result UI when entering either scanner mode.
+        qr.setVisibility(View.VISIBLE);
+        ocrQrContainer.setVisibility(View.GONE);
+        ocrQrContainer.removeAllViews();
 
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},REQ);
@@ -181,36 +188,56 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        StringBuilder detected = new StringBuilder();
+                        java.util.LinkedHashSet<String> gtins =
+                            new java.util.LinkedHashSet<>();
+
+                        java.util.LinkedHashSet<String> wmsCodes =
+                            new java.util.LinkedHashSet<>();
+
+                        java.util.LinkedHashSet<String> locations =
+                            new java.util.LinkedHashSet<>();
 
                         for(Text.TextBlock block : result.getTextBlocks()){
 
-                            String value = block.getText();
+                            for(Text.Line line : block.getLines()){
 
-                            if(value != null && !value.trim().isEmpty()){
+                                String lineText = line.getText();
 
-                                if(detected.length() > 0){
-                                    detected.append(" ");
+                                if(lineText == null || lineText.trim().isEmpty()){
+                                    continue;
                                 }
 
-                                detected.append(value.trim());
+                                classifyOcrLine(
+                                    lineText,
+                                    gtins,
+                                    wmsCodes,
+                                    locations
+                                );
                             }
                         }
 
-                        String text = detected.toString().trim();
+                        if(!gtins.isEmpty()
+                                || !wmsCodes.isEmpty()
+                                || !locations.isEmpty()){
 
-                        if(!text.isEmpty()){
+                            ocrDetected = true;
 
-                            String cleaned = text
-                                .replaceAll("[^A-Za-z0-9]+", " ")
-                                .trim();
+                            final java.util.ArrayList<String> finalGtins =
+                                new java.util.ArrayList<>(gtins);
 
-                            if(!cleaned.isEmpty()){
+                            final java.util.ArrayList<String> finalWms =
+                                new java.util.ArrayList<>(wmsCodes);
 
-                                ocrDetected = true;
+                            final java.util.ArrayList<String> finalLocations =
+                                new java.util.ArrayList<>(locations);
 
-                                runOnUiThread(() -> showSameQrResult(cleaned));
-                            }
+                            runOnUiThread(() ->
+                                showOcrResults(
+                                    finalGtins,
+                                    finalWms,
+                                    finalLocations
+                                )
+                            );
                         }
 
                         image.close();
@@ -221,10 +248,192 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    void showSameQrResult(String text){
-        String cleaned = text.trim();
 
-        if(cleaned.isEmpty()) return;
+    void classifyOcrLine(
+        String raw,
+        java.util.Set<String> gtins,
+        java.util.Set<String> wmsCodes,
+        java.util.Set<String> locations){
+
+        String text = raw.trim();
+
+        if(text.isEmpty()){
+            return;
+        }
+
+        /*
+         * Remove common OCR labels so values such as:
+         * GTIN: 9880000038750
+         * WMS: 11649903984P
+         * LOCATION: DS28-03-01-04A
+         * can also be recognized.
+         */
+        text = text.replaceAll(
+            "(?i)\\b(PBARCODE|P-BARCODE|GTIN|WMS|BARCODE|LOCATION|LOC)\\s*[:#-]?\\s*",
+            " "
+        ).trim();
+
+        /*
+         * A line may contain more than one OCR element.
+         * Check the complete line first, then individual tokens.
+         */
+        java.util.ArrayList<String> candidates =
+            new java.util.ArrayList<>();
+
+        candidates.add(text);
+
+        String[] parts = text.split("\\s+");
+
+        for(String part : parts){
+            if(part != null && !part.trim().isEmpty()){
+                candidates.add(part.trim());
+            }
+        }
+
+        for(String candidate : candidates){
+
+            String value = candidate.trim();
+
+            if(value.isEmpty()){
+                continue;
+            }
+
+            /*
+             * Remove OCR punctuation around a value.
+             * Keep internal hyphens because Location uses them.
+             */
+            value = value.replaceAll(
+                "^[^A-Za-z0-9]+|[^A-Za-z0-9]+$",
+                ""
+            );
+
+            if(value.isEmpty()){
+                continue;
+            }
+
+            String normalized = value
+                .toUpperCase(java.util.Locale.US)
+                .replaceAll("\\s+", "");
+
+            /*
+             * 1. WMS BARCODE
+             *
+             * Catalog values look like:
+             * 11649903984P
+             */
+            /*
+             * 1. WMS BARCODE
+             *
+             * Accept catalog WMS values AND unknown WMS numbers
+             * ending with P.
+             *
+             * Example:
+             * 11649903984P
+             */
+            if(isKnownWms(normalized)
+                    || normalized.matches("\\d{8,14}P")){
+
+                wmsCodes.add(normalized);
+                continue;
+            }
+
+            /*
+             * 2. GTIN / P-BARCODE
+             *
+             * Accept catalog GTIN values AND unknown numeric
+             * GTIN / barcode values.
+             *
+             * Supports 8-14 digit numeric values.
+             */
+            if(isKnownGtin(normalized)
+                    || normalized.matches("\\d{8,14}")){
+
+                gtins.add(normalized);
+                continue;
+            }
+
+            /*
+             * 3. LOCATION
+             *
+             * Example:
+             * DS28-03-01-04A
+             *
+             * This deliberately requires the structured
+             * warehouse-location format rather than accepting
+             * arbitrary OCR text.
+             */
+            if(isLocation(normalized)){
+                locations.add(normalized);
+            }
+        }
+    }
+
+
+    boolean isKnownGtin(String value){
+
+        if(value == null || value.isEmpty()){
+            return false;
+        }
+
+        if(products.containsKey(value)){
+            return true;
+        }
+
+        for(Product product : products.values()){
+
+            if(product.gtin != null
+                    && product.gtin.trim().equalsIgnoreCase(value)){
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    boolean isKnownWms(String value){
+
+        if(value == null || value.isEmpty()){
+            return false;
+        }
+
+        for(Product product : products.values()){
+
+            if(product.wms != null
+                    && product.wms.trim().equalsIgnoreCase(value)){
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    boolean isLocation(String value){
+
+        if(value == null){
+            return false;
+        }
+
+        /*
+         * Warehouse location format:
+         * DS28-03-01-04A
+         *
+         * Allows similar structured locations while rejecting
+         * ordinary words and random OCR sentences.
+         */
+        return value.matches(
+            "(?i)[A-Z]{1,4}\\d{1,4}(?:-[A-Z0-9]{1,6}){2,5}"
+        );
+    }
+
+
+    void showOcrResults(
+        java.util.ArrayList<String> gtins,
+        java.util.ArrayList<String> wmsCodes,
+        java.util.ArrayList<String> locations){
 
         stopCamera();
 
@@ -233,20 +442,156 @@ public class MainActivity extends AppCompatActivity {
         resultScroll.setVisibility(View.VISIBLE);
         notFound.setVisibility(View.GONE);
 
-        info.setText(
-            "OCR text:\n" + cleaned +
-            "\n\nQR content:\n" + cleaned
-        );
+        /*
+         * Feature 2 uses its own QR container.
+         * Hide the original single-QR view used by Feature 1.
+         */
+        qr.setVisibility(View.GONE);
+        ocrQrContainer.setVisibility(View.VISIBLE);
+        ocrQrContainer.removeAllViews();
 
-        try{
-            qr.setImageBitmap(makeQr(cleaned,800));
-            status.setText("QR generated successfully.");
-        }catch(Exception e){
-            status.setText("QR error: " + e.getMessage());
+        resultTitle.setText("OCR RESULTS");
+
+        StringBuilder detectedInfo = new StringBuilder();
+
+        if(!gtins.isEmpty()){
+            detectedInfo.append("Pbarcode / GTIN detected: ")
+                .append(gtins.size())
+                .append("\n");
         }
+
+        if(!wmsCodes.isEmpty()){
+            detectedInfo.append("WMS barcode detected: ")
+                .append(wmsCodes.size())
+                .append("\n");
+        }
+
+        if(!locations.isEmpty()){
+            detectedInfo.append("Location detected: ")
+                .append(locations.size())
+                .append("\n");
+        }
+
+        info.setText(detectedInfo.toString().trim());
+
+        /*
+         * Required order:
+         * 1. GTIN
+         * 2. WMS
+         * 3. LOCATION
+         */
+        for(String value : gtins){
+            addOcrQrCard("GTIN / P-BARCODE", value);
+        }
+
+        for(String value : wmsCodes){
+            addOcrQrCard("WMS BARCODE", value);
+        }
+
+        for(String value : locations){
+            addOcrQrCard("LOCATION", value);
+        }
+
+        status.setText(
+            "OCR complete — "
+            + (gtins.size() + wmsCodes.size() + locations.size())
+            + " QR"
+            + ((gtins.size() + wmsCodes.size() + locations.size()) == 1 ? "" : "s")
+            + " generated."
+        );
 
         resultScroll.post(() -> resultScroll.requestFocus());
     }
+
+
+    void addOcrQrCard(String type, String value){
+
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(android.view.Gravity.CENTER);
+        card.setPadding(18,18,18,18);
+
+        LinearLayout.LayoutParams cardParams =
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+
+        cardParams.topMargin = 14;
+        card.setLayoutParams(cardParams);
+        card.setBackgroundColor(Color.rgb(23,23,23));
+
+        TextView title = new TextView(this);
+        title.setText(type);
+        title.setTextColor(Color.rgb(119,119,119));
+        title.setTextSize(12);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setGravity(android.view.Gravity.CENTER);
+
+        TextView content = new TextView(this);
+        content.setText(value);
+        content.setTextColor(Color.WHITE);
+        content.setTextSize(16);
+        content.setGravity(android.view.Gravity.CENTER);
+        content.setPadding(0,10,0,10);
+
+        ImageView image = new ImageView(this);
+        image.setAdjustViewBounds(true);
+        image.setBackgroundColor(Color.WHITE);
+        image.setPadding(8,8,8,8);
+
+        LinearLayout.LayoutParams qrParams =
+            new LinearLayout.LayoutParams(280,280);
+
+        image.setLayoutParams(qrParams);
+
+        card.addView(title);
+        card.addView(content);
+        card.addView(image);
+
+        try{
+
+            image.setImageBitmap(makeQr(value,800));
+
+        }catch(Exception e){
+
+            content.setText(
+                value + "\n\nQR error: " + e.getMessage()
+            );
+        }
+
+        ocrQrContainer.addView(card);
+    }
+
+
+    void showSameQrResult(String text){
+        /*
+         * Kept as a compatibility method for the previous OCR
+         * implementation. Feature 2 now uses showOcrResults().
+         */
+        if(text == null || text.trim().isEmpty()){
+            return;
+        }
+
+        java.util.ArrayList<String> gtins =
+            new java.util.ArrayList<>();
+
+        java.util.ArrayList<String> wms =
+            new java.util.ArrayList<>();
+
+        java.util.ArrayList<String> locations =
+            new java.util.ArrayList<>();
+
+        classifyOcrLine(text, gtins, wms, locations);
+
+        if(!gtins.isEmpty()
+                || !wms.isEmpty()
+                || !locations.isEmpty()){
+
+            showOcrResults(gtins, wms, locations);
+        }
+    }
+
 
     void showOcrPreview(String text){
         String cleaned=text.trim();
