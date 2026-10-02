@@ -37,7 +37,7 @@ import java.io.*; import java.util.*; import java.util.concurrent.*;
 public class MainActivity extends AppCompatActivity {
     static final int REQ=1001;
     TextRecognizer textRecognizer;
-    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     LinearLayout ocrQrContainer;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
@@ -46,11 +46,11 @@ public class MainActivity extends AppCompatActivity {
         showModeScreen();}
 
     void bind(){
-        preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo);
+        preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo); resultTitle=findViewById(R.id.resultTitle);
+        ocrQrContainer=findViewById(R.id.ocrQrContainer);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
-        ocrQrContainer=findViewById(R.id.ocrQrContainer);
         modeSelection=findViewById(R.id.modeSelection);
         wmsModeButton=findViewById(R.id.wmsModeButton);
         textQrModeButton=findViewById(R.id.textQrModeButton);
@@ -505,7 +505,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     void addOcrQrCard(String type, String value){
-
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(android.view.Gravity.CENTER);
@@ -523,7 +522,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.rgb(119,119,119));
+        title.setTextColor(Color.WHITE);
         title.setTextSize(12);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
@@ -542,7 +541,6 @@ public class MainActivity extends AppCompatActivity {
 
         LinearLayout.LayoutParams qrParams =
             new LinearLayout.LayoutParams(280,280);
-
         image.setLayoutParams(qrParams);
 
         card.addView(title);
@@ -550,19 +548,13 @@ public class MainActivity extends AppCompatActivity {
         card.addView(image);
 
         try{
-
             image.setImageBitmap(makeQr(value,800));
-
         }catch(Exception e){
-
-            content.setText(
-                value + "\n\nQR error: " + e.getMessage()
-            );
+            content.setText(value + "\n\nQR error: " + e.getMessage());
         }
 
         ocrQrContainer.addView(card);
     }
-
 
     void showSameQrResult(String text){
         /*
@@ -573,14 +565,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        java.util.ArrayList<String> gtins =
-            new java.util.ArrayList<>();
+        java.util.LinkedHashSet<String> gtins =
+            new java.util.LinkedHashSet<>();
 
-        java.util.ArrayList<String> wms =
-            new java.util.ArrayList<>();
+        java.util.LinkedHashSet<String> wms =
+            new java.util.LinkedHashSet<>();
 
-        java.util.ArrayList<String> locations =
-            new java.util.ArrayList<>();
+        java.util.LinkedHashSet<String> locations =
+            new java.util.LinkedHashSet<>();
 
         classifyOcrLine(text, gtins, wms, locations);
 
@@ -588,10 +580,13 @@ public class MainActivity extends AppCompatActivity {
                 || !wms.isEmpty()
                 || !locations.isEmpty()){
 
-            showOcrResults(gtins, wms, locations);
+            showOcrResults(
+                new java.util.ArrayList<>(gtins),
+                new java.util.ArrayList<>(wms),
+                new java.util.ArrayList<>(locations)
+            );
         }
     }
-
 
     void showOcrPreview(String text){
         String cleaned=text.trim();

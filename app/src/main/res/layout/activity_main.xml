@@ -305,6 +305,13 @@
                     android:padding="8dp"
                     android:layout_width="280dp"
                     android:layout_height="280dp"/>
+
+                <LinearLayout
+                    android:id="@+id/ocrQrContainer"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <!-- ACTION BUTTONS -->
