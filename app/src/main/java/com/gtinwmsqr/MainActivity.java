@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.print.PrintAttributes;
 import android.print.PrintManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
