@@ -21,6 +21,10 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.zxing.BarcodeFormat;
@@ -31,9 +35,15 @@ import org.json.JSONArray; import org.json.JSONObject;
 import java.io.*; import java.util.*; import java.util.concurrent.*;
 
 public class MainActivity extends AppCompatActivity {
-    static final int REQ=1001; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    static final int REQ=1001;
+    TextRecognizer textRecognizer;
+    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
-    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());showModeScreen();}
+    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
+        textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+        showModeScreen();}
+
     void bind(){
         preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
@@ -66,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void openScannerMode(){
+        ocrDetected=false;
         modeSelection.setVisibility(View.GONE);
         cameraCard.setVisibility(View.VISIBLE);
         manualPanel.setVisibility(View.GONE);
@@ -84,7 +95,150 @@ public class MainActivity extends AppCompatActivity {
         if(activeCamera==null){ Toast.makeText(this,"Camera is still starting",Toast.LENGTH_SHORT).show(); return; }
         try { torchOn=!torchOn; activeCamera.getCameraControl().enableTorch(torchOn); } catch(Exception e){ Toast.makeText(this,"Flashlight unavailable",Toast.LENGTH_SHORT).show(); }
     }
-    void startCamera(){if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){status.setText("Camera permission is required.");return;}ListenableFuture<ProcessCameraProvider> f=ProcessCameraProvider.getInstance(this);f.addListener(()->{try{ProcessCameraProvider cp=f.get();Preview p=new Preview.Builder().build();p.setSurfaceProvider(preview.getSurfaceProvider());analysis=new ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();analysis.setAnalyzer(Executors.newSingleThreadExecutor(),image->{InputImage ii=InputImage.fromMediaImage(image.getImage(),image.getImageInfo().getRotationDegrees());scanner.process(ii).addOnSuccessListener(bs->{for(com.google.mlkit.vision.barcode.common.Barcode x:bs){String v=x.getRawValue();if(v!=null&&!v.isEmpty()){runOnUiThread(()->find(v));break;}}}).addOnCompleteListener(x->image.close());});cp.unbindAll();activeCamera=cp.bindToLifecycle(this,CameraSelector.DEFAULT_BACK_CAMERA,p,analysis);status.setText("Camera ready — scan the product GTIN.");}catch(Exception e){status.setText("Camera error: "+e.getMessage());}},ContextCompat.getMainExecutor(this));}
+    void startCamera(){
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
+            status.setText("Camera permission is required.");
+            return;
+        }
+
+        ListenableFuture<ProcessCameraProvider> f =
+            ProcessCameraProvider.getInstance(this);
+
+        f.addListener(()->{
+            try{
+                ProcessCameraProvider cp=f.get();
+
+                Preview p=new Preview.Builder().build();
+                p.setSurfaceProvider(preview.getSurfaceProvider());
+
+                analysis=new ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build();
+
+                if(textQrMode){
+                    startOcrAnalyzer(analysis);
+                }else{
+                    analysis.setAnalyzer(
+                        Executors.newSingleThreadExecutor(),
+                        image->{
+                            InputImage ii=InputImage.fromMediaImage(
+                                image.getImage(),
+                                image.getImageInfo().getRotationDegrees()
+                            );
+
+                            scanner.process(ii)
+                                .addOnSuccessListener(bs->{
+                                    for(com.google.mlkit.vision.barcode.common.Barcode x:bs){
+                                        String v=x.getRawValue();
+
+                                        if(v!=null&&!v.isEmpty()){
+                                            runOnUiThread(()->find(v));
+                                            break;
+                                        }
+                                    }
+                                })
+                                .addOnCompleteListener(x->image.close());
+                        }
+                    );
+                }
+
+                cp.unbindAll();
+
+                activeCamera=cp.bindToLifecycle(
+                    this,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    p,
+                    analysis
+                );
+
+                status.setText(
+                    textQrMode
+                        ? "OCR camera ready — point at the GTIN text."
+                        : "Camera ready — scan the product GTIN."
+                );
+
+            }catch(Exception e){
+                status.setText("Camera error: "+e.getMessage());
+            }
+        },ContextCompat.getMainExecutor(this));
+    }
+
+    void startOcrAnalyzer(ImageAnalysis analysis){
+        analysis.setAnalyzer(
+            Executors.newSingleThreadExecutor(),
+            image -> {
+
+                InputImage imageInput = InputImage.fromMediaImage(
+                    image.getImage(),
+                    image.getImageInfo().getRotationDegrees()
+                );
+
+                textRecognizer.process(imageInput)
+                    .addOnSuccessListener(result -> {
+
+                        if(ocrDetected){
+                            image.close();
+                            return;
+                        }
+
+                        StringBuilder detected = new StringBuilder();
+
+                        for(Text.TextBlock block : result.getTextBlocks()){
+
+                            String value = block.getText();
+
+                            if(value != null && !value.trim().isEmpty()){
+
+                                if(detected.length() > 0){
+                                    detected.append(" ");
+                                }
+
+                                detected.append(value.trim());
+                            }
+                        }
+
+                        String text = detected.toString().trim();
+
+                        if(!text.isEmpty()){
+
+                            String cleaned = text
+                                .replaceAll("[^A-Za-z0-9]+", " ")
+                                .trim();
+
+                            if(!cleaned.isEmpty()){
+
+                                ocrDetected = true;
+
+                                runOnUiThread(() -> {
+
+                                    status.setText(
+                                        "OCR detected: " + cleaned
+                                    );
+
+                                    Toast.makeText(
+                                        this,
+                                        "Detected: " + cleaned,
+                                        Toast.LENGTH_LONG
+                                    ).show();
+                                });
+                            }
+                        }
+
+                        image.close();
+
+                    })
+                    .addOnFailureListener(e -> image.close());
+            }
+        );
+    }
+
+    void showOcrPreview(String text){
+        String cleaned=text.trim();
+        if(cleaned.isEmpty())return;
+
+        status.setText("OCR detected: " + cleaned.replace("\\n"," | "));
+    }
+
     void stopCamera(){try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
     void find(String v){String key=(v==null?"":v).trim();input.setText(key);notFound.setVisibility(View.GONE);if(key.isEmpty())return;Product p=products.get(key);if(p==null){notFound.setText("Product not found\n\nNo matching pbarcode_canonical was found in this catalog.\n\nGTIN: "+key);notFound.setVisibility(View.VISIBLE);return;}last=p;stopCamera();cameraCard.setVisibility(View.GONE);manualPanel.setVisibility(View.GONE);resultScroll.setVisibility(View.VISIBLE);info.setText("GTIN / pbarcode_canonical:  "+p.gtin+"\nWMS barcode:  "+p.wms+"\nPartner ID:  "+p.partner+"\nStatus:  "+p.status);try{qr.setImageBitmap(makeQr(p.wms,800));}catch(Exception e){status.setText("QR error: "+e.getMessage());}resultScroll.post(()->resultScroll.requestFocus());}
     Bitmap makeQr(String text,int size)throws WriterException{BitMatrix m=new MultiFormatWriter().encode(text,BarcodeFormat.QR_CODE,size,size);Bitmap b=Bitmap.createBitmap(size,size,Bitmap.Config.ARGB_8888);for(int y=0;y<size;y++)for(int x=0;x<size;x++)b.setPixel(x,y,m.get(x,y)?Color.BLACK:Color.WHITE);return b;}
