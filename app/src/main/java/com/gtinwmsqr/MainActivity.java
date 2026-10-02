@@ -575,55 +575,82 @@ public class MainActivity extends AppCompatActivity {
 
 
     void addOcrQrCard(String type, String value){
+
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setGravity(android.view.Gravity.CENTER);
         card.setPadding(18,18,18,18);
-
-        LinearLayout.LayoutParams cardParams =
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-
-        cardParams.topMargin = 14;
-        card.setLayoutParams(cardParams);
-        card.setBackgroundColor(Color.rgb(23,23,23));
+        card.setBackgroundColor(Color.BLACK);
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.WHITE);
-        title.setTextSize(12);
-        title.setTypeface(null, android.graphics.Typeface.BOLD);
-        title.setGravity(android.view.Gravity.CENTER);
+        title.setTextColor(Color.rgb(255,193,7));
+        title.setTextSize(17);
+        title.setTypeface(null,android.graphics.Typeface.BOLD);
 
         TextView content = new TextView(this);
         content.setText(value);
         content.setTextColor(Color.WHITE);
         content.setTextSize(16);
-        content.setGravity(android.view.Gravity.CENTER);
-        content.setPadding(0,10,0,10);
+        content.setPadding(0,8,0,8);
 
         ImageView image = new ImageView(this);
-        image.setAdjustViewBounds(true);
-        image.setBackgroundColor(Color.WHITE);
-        image.setPadding(8,8,8,8);
-
-        LinearLayout.LayoutParams qrParams =
-            new LinearLayout.LayoutParams(280,280);
-        image.setLayoutParams(qrParams);
-
-        card.addView(title);
-        card.addView(content);
-        card.addView(image);
+        image.setLayoutParams(
+            new LinearLayout.LayoutParams(280,280)
+        );
+        image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
         try{
             image.setImageBitmap(makeQr(value,800));
         }catch(Exception e){
-            content.setText(value + "\n\nQR error: " + e.getMessage());
+            content.setText(
+                value + "\n\nQR error: " + e.getMessage()
+            );
         }
 
-        ocrQrContainer.addView(card);
+        LinearLayout actions = createActionRow(
+            () -> copyValue(content.getText().toString()),
+            () -> editValueDialog(
+                "Edit " + type,
+                content.getText().toString(),
+                newValue -> {
+
+                    if(newValue.trim().isEmpty()) return;
+
+                    String updated = newValue.trim();
+                    content.setText(updated);
+
+                    try{
+                        image.setImageBitmap(
+                            makeQr(updated,800)
+                        );
+
+                        status.setText(
+                            type + " updated — QR regenerated."
+                        );
+
+                    }catch(Exception e){
+                        status.setText(
+                            "QR error: " + e.getMessage()
+                        );
+                    }
+                }
+            )
+        );
+
+        card.addView(title);
+        card.addView(content);
+        card.addView(image);
+        card.addView(actions);
+
+        LinearLayout.LayoutParams params =
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+
+        params.setMargins(0,0,0,24);
+
+        ocrQrContainer.addView(card,params);
     }
 
     void showSameQrResult(String text){
@@ -666,7 +693,287 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void stopCamera(){try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
-    void find(String v){String key=(v==null?"":v).trim();input.setText(key);notFound.setVisibility(View.GONE);if(key.isEmpty())return;Product p=products.get(key);if(p==null){notFound.setText("Product not found\n\nNo matching pbarcode_canonical was found in this catalog.\n\nGTIN: "+key);notFound.setVisibility(View.VISIBLE);return;}last=p;stopCamera();cameraCard.setVisibility(View.GONE);manualPanel.setVisibility(View.GONE);resultScroll.setVisibility(View.VISIBLE);info.setText("GTIN / pbarcode_canonical:  "+p.gtin+"\nWMS barcode:  "+p.wms+"\nPartner ID:  "+p.partner+"\nStatus:  "+p.status);try{qr.setImageBitmap(makeQr(p.wms,800));}catch(Exception e){status.setText("QR error: "+e.getMessage());}resultScroll.post(()->resultScroll.requestFocus());}
+    void find(String v){
+        String key=(v==null?"":v).trim();
+        input.setText(key);
+        notFound.setVisibility(View.GONE);
+
+        if(key.isEmpty())return;
+
+        Product p=products.get(key);
+
+        if(p==null){
+            notFound.setText(
+                "Product not found\n\n" +
+                "No matching pbarcode_canonical was found in this catalog.\n\n" +
+                "GTIN: "+key
+            );
+            notFound.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        last=p;
+        stopCamera();
+        cameraCard.setVisibility(View.GONE);
+        manualPanel.setVisibility(View.GONE);
+        resultScroll.setVisibility(View.VISIBLE);
+
+        info.setText(
+            "GTIN / pbarcode_canonical:  "+p.gtin+
+            "\nWMS barcode:  "+p.wms+
+            "\nPartner ID:  "+p.partner+
+            "\nStatus:  "+p.status
+        );
+
+        addFeature1Actions(p);
+
+        try{
+            qr.setVisibility(View.VISIBLE);
+            ocrQrContainer.setVisibility(View.GONE);
+            qr.setImageBitmap(makeQr(p.wms,800));
+        }catch(Exception e){
+            status.setText("QR error: "+e.getMessage());
+        }
+
+        resultScroll.post(()->resultScroll.requestFocus());
+    }
+
+    LinearLayout createActionRow(
+        Runnable copyAction,
+        Runnable editAction){
+
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(android.view.Gravity.CENTER);
+        row.setPadding(0,8,0,4);
+
+        TextView copy = new TextView(this);
+        copy.setText("⧉  COPY");
+        copy.setTextColor(Color.rgb(255,193,7));
+        copy.setTextSize(15);
+        copy.setTypeface(null,android.graphics.Typeface.BOLD);
+        copy.setGravity(android.view.Gravity.CENTER);
+        copy.setPadding(18,12,18,12);
+
+        copy.setOnClickListener(v -> copyAction.run());
+
+        TextView edit = new TextView(this);
+        edit.setText("✎  EDIT");
+        edit.setTextColor(Color.rgb(255,193,7));
+        edit.setTextSize(15);
+        edit.setTypeface(null,android.graphics.Typeface.BOLD);
+        edit.setGravity(android.view.Gravity.CENTER);
+        edit.setPadding(18,12,18,12);
+
+        edit.setOnClickListener(v -> editAction.run());
+
+        row.addView(
+            copy,
+            new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1
+            )
+        );
+
+        row.addView(
+            edit,
+            new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1
+            )
+        );
+
+        return row;
+    }
+
+    void copyValue(String value){
+
+        android.content.ClipboardManager clipboard =
+            (android.content.ClipboardManager)
+            getSystemService(CLIPBOARD_SERVICE);
+
+        clipboard.setPrimaryClip(
+            android.content.ClipData.newPlainText(
+                "Scanned value",
+                value
+            )
+        );
+
+        if(android.os.Build.VERSION.SDK_INT <=
+                android.os.Build.VERSION_CODES.S_V2){
+
+            Toast.makeText(
+                this,
+                "Copied: " + value,
+                Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+
+    interface ValueEditor{
+        void onValue(String value);
+    }
+
+    void editValueDialog(
+        String title,
+        String currentValue,
+        ValueEditor editor){
+
+        EditText editText = new EditText(this);
+        editText.setText(currentValue);
+        editText.setSingleLine(true);
+        editText.setSelectAllOnFocus(true);
+
+        new android.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(editText)
+            .setNegativeButton("CANCEL",null)
+            .setPositiveButton(
+                "UPDATE",
+                (dialog,which) -> {
+                    editor.onValue(
+                        editText.getText().toString().trim()
+                    );
+                }
+            )
+            .show();
+    }
+
+    void addFeature1Actions(Product p){
+
+        View old = resultScroll.findViewWithTag(
+            "feature1Actions"
+        );
+
+        if(old != null){
+            ViewGroup oldParent =
+                (ViewGroup)old.getParent();
+
+            if(oldParent != null){
+                oldParent.removeView(old);
+            }
+        }
+
+        ViewGroup parent =
+            (ViewGroup)info.getParent();
+
+        LinearLayout wrapper =
+            new LinearLayout(this);
+
+        wrapper.setOrientation(
+            LinearLayout.VERTICAL
+        );
+
+        wrapper.setTag("feature1Actions");
+
+        TextView gtinLabel =
+            new TextView(this);
+
+        gtinLabel.setText("SCANNED GTIN");
+        gtinLabel.setTextColor(
+            Color.rgb(255,193,7)
+        );
+        gtinLabel.setTextSize(14);
+        gtinLabel.setTypeface(
+            null,
+            android.graphics.Typeface.BOLD
+        );
+
+        wrapper.addView(gtinLabel);
+
+        wrapper.addView(
+            createActionRow(
+                () -> copyValue(p.gtin),
+                () -> editValueDialog(
+                    "EDIT GTIN",
+                    p.gtin,
+                    newValue -> {
+                        if(newValue.isEmpty()) return;
+                        find(newValue);
+                    }
+                )
+            )
+        );
+
+        TextView wmsLabel =
+            new TextView(this);
+
+        wmsLabel.setText("WMS BARCODE");
+        wmsLabel.setTextColor(
+            Color.rgb(255,193,7)
+        );
+        wmsLabel.setTextSize(14);
+        wmsLabel.setTypeface(
+            null,
+            android.graphics.Typeface.BOLD
+        );
+        wmsLabel.setPadding(0,12,0,0);
+
+        wrapper.addView(wmsLabel);
+
+        wrapper.addView(
+            createActionRow(
+                () -> copyValue(
+                    last == null ? p.wms : last.wms
+                ),
+                () -> editValueDialog(
+                    "EDIT WMS",
+                    last == null ? p.wms : last.wms,
+                    newValue -> {
+
+                        if(newValue.isEmpty()) return;
+
+                        if(last != null){
+                            last.wms = newValue;
+                        }
+
+                        try{
+                            qr.setImageBitmap(
+                                makeQr(newValue,800)
+                            );
+
+                            if(last != null){
+                                info.setText(
+                                    "GTIN / pbarcode_canonical:  "+
+                                    last.gtin+
+                                    "\nWMS barcode:  "+
+                                    last.wms+
+                                    "\nPartner ID:  "+
+                                    last.partner+
+                                    "\nStatus:  "+
+                                    last.status
+                                );
+                            }
+
+                            status.setText(
+                                "WMS updated — QR regenerated."
+                            );
+
+                        }catch(Exception e){
+                            status.setText(
+                                "QR error: " +
+                                e.getMessage()
+                            );
+                        }
+                    }
+                )
+            )
+        );
+
+        int index = parent.indexOfChild(info);
+
+        parent.addView(
+            wrapper,
+            index + 1,
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        );
+    }
+
     Bitmap makeQr(String text,int size)throws WriterException{BitMatrix m=new MultiFormatWriter().encode(text,BarcodeFormat.QR_CODE,size,size);Bitmap b=Bitmap.createBitmap(size,size,Bitmap.Config.ARGB_8888);for(int y=0;y<size;y++)for(int x=0;x<size;x++)b.setPixel(x,y,m.get(x,y)?Color.BLACK:Color.WHITE);return b;}
     void saveQr(){if(last==null)return;Bitmap b;try{b=makeQr(last.wms,1000);}catch(Exception e){Toast.makeText(this,"QR generation failed: "+e.getMessage(),Toast.LENGTH_LONG).show();return;}String name="QR-"+last.wms+".png";ContentValues v=new ContentValues();v.put(MediaStore.Images.Media.DISPLAY_NAME,name);v.put(MediaStore.Images.Media.MIME_TYPE,"image/png");v.put(MediaStore.Images.Media.RELATIVE_PATH,"Pictures/GTIN-WMS-QR");try{android.net.Uri u=getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,v);try(OutputStream o=getContentResolver().openOutputStream(u)){b.compress(Bitmap.CompressFormat.PNG,100,o);}Toast.makeText(this,"QR saved to Pictures/GTIN-WMS-QR",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"Save failed: "+e.getMessage(),Toast.LENGTH_LONG).show();}}
     void printQr(){if(last==null)return;PrintManager pm=(PrintManager)getSystemService(PRINT_SERVICE);pm.print("GTIN-WMS-QR-"+last.wms,new QrPrintAdapter(this,qr.getDrawable()),new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build());}
