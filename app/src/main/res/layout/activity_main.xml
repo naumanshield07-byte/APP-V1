@@ -28,8 +28,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:gravity="center"
-            android:background="#FFC107"
-            android:padding="18dp"
+            android:background="#000000"
+            android:padding="0dp"
             android:layout_marginTop="55dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -80,7 +80,7 @@
         android:gravity="center_vertical"
         android:paddingStart="18dp"
         android:paddingEnd="12dp"
-        android:background="#111111"
+        android:background="#000000"
         android:layout_width="match_parent"
         android:layout_height="64dp">
 
@@ -93,7 +93,7 @@
 
             <TextView
                 android:text="GTIN → WMS QR"
-                android:textColor="#8B0000"
+                android:textColor="#FFC107"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
@@ -101,7 +101,7 @@
 
             <TextView
                 android:text="WAREHOUSE SCANNER"
-                android:textColor="#777777"
+                android:textColor="#FFC107"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.12"
@@ -114,7 +114,7 @@
             android:src="@android:drawable/ic_menu_camera"
             android:contentDescription="Toggle flashlight"
             android:background="@android:color/transparent"
-            android:tint="#B91C1C"
+            android:tint="#FFC107"
             android:padding="10dp"
             android:layout_width="52dp"
             android:layout_height="52dp"/>
@@ -143,8 +143,8 @@
             android:text="← Change Mode"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#8B0000"
+            android:textColor="#000000"
+            android:backgroundTint="#FFC107"
             android:minHeight="48dp"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
@@ -157,11 +157,11 @@
         <TextView
             android:id="@+id/cameraHint"
             android:text="SCAN PRODUCT GTIN"
-            android:textColor="#8B0000"
+            android:textColor="#FFC107"
             android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="#CC111111"
+            android:background="#000000"
             android:padding="12dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="82dp"
@@ -174,7 +174,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="#E6111111"
+            android:background="#000000"
             android:padding="8dp"
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
@@ -185,8 +185,8 @@
                 android:text="⌨  Enter GTIN manually"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#8B0000"
+                android:textColor="#000000"
+                android:backgroundTint="#FFC107"
                 android:minHeight="52dp"
                 android:minWidth="220dp"
                 android:paddingStart="18dp"
@@ -202,7 +202,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="12dp"
-        android:background="#151515"
+        android:background="#000000"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -210,13 +210,13 @@
         <EditText
             android:id="@+id/gtinInput"
             android:hint="Enter / paste GTIN"
-            android:textColorHint="#777777"
-            android:textColor="#FFFFFF"
+            android:textColorHint="#FFC107"
+            android:textColor="#FFC107"
             android:inputType="number"
             android:singleLine="true"
             android:textSize="17sp"
             android:padding="12dp"
-            android:background="#222222"
+            android:background="#000000"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="56dp"/>
@@ -226,8 +226,8 @@
             android:text="Find"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#8B0000"
+            android:textColor="#000000"
+            android:backgroundTint="#FFC107"
             android:minHeight="52dp"
             android:layout_marginStart="10dp"
             android:layout_width="92dp"
@@ -254,7 +254,7 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:padding="18dp"
-                android:background="#171717"
+                android:background="#000000"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -263,13 +263,13 @@
                     android:text="Product found"
                     android:textSize="21sp"
                     android:textStyle="bold"
-                    android:textColor="#8B0000"
+                    android:textColor="#FFC107"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <TextView
                     android:id="@+id/productInfo"
-                    android:textColor="#E5E5E5"
+                    android:textColor="#FFC107"
                     android:textSize="16sp"
                     android:layout_marginTop="14dp"
                     android:lineSpacingExtra="7dp"
@@ -283,13 +283,13 @@
                 android:gravity="center"
                 android:padding="18dp"
                 android:layout_marginTop="14dp"
-                android:background="#171717"
+                android:background="#000000"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
                     android:text="GENERATED WMS QR"
-                    android:textColor="#777777"
+                    android:textColor="#FFC107"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.08"
@@ -303,8 +303,8 @@
                     android:layout_marginTop="12dp"
                     android:background="#FFFFFF"
                     android:padding="8dp"
-                    android:layout_width="280dp"
-                    android:layout_height="280dp"/>
+                    android:layout_width="340dp"
+                    android:layout_height="340dp"/>
 
                 <LinearLayout
                     android:id="@+id/ocrQrContainer"
@@ -326,8 +326,8 @@
                     android:text="↓  Save QR"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#8B0000"
+                    android:textColor="#000000"
+                    android:backgroundTint="#FFC107"
                     android:minHeight="56dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
@@ -338,8 +338,8 @@
                     android:text="Print"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#8B0000"
+                    android:textColor="#000000"
+                    android:backgroundTint="#FFC107"
                     android:minHeight="56dp"
                     android:layout_marginStart="10dp"
                     android:layout_weight="1"
@@ -353,8 +353,8 @@
                 android:text="📷  Scan Another GTIN"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#8B0000"
+                android:textColor="#000000"
+                android:backgroundTint="#FFC107"
                 android:minHeight="56dp"
                 android:layout_marginTop="12dp"
                 android:layout_width="match_parent"
@@ -366,11 +366,11 @@
                 android:text="Product not found"
                 android:textSize="17sp"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
+                android:textColor="#FFC107"
                 android:visibility="gone"
                 android:layout_marginTop="14dp"
                 android:padding="16dp"
-                android:background="#7F1D1D"
+                android:background="#000000"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -381,11 +381,11 @@
     <TextView
         android:id="@+id/statusText"
         android:text="Opening camera…"
-        android:textColor="#16A34A"
+        android:textColor="#FFC107"
         android:textSize="12sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:background="#111111"
+        android:background="#000000"
         android:padding="6dp"
         android:layout_width="match_parent"
         android:layout_height="32dp"/>
