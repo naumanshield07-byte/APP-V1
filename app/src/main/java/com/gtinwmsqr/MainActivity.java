@@ -362,8 +362,18 @@ public class MainActivity extends AppCompatActivity {
              * warehouse-location format rather than accepting
              * arbitrary OCR text.
              */
-            if(isLocation(normalized)){
-                locations.add(normalized);
+            /*
+             * 3. LOCATION
+             *
+             * Validate against the exact warehouse location
+             * formats. OCR correction is position-aware and
+             * only accepted when the corrected value becomes
+             * a valid location.
+             */
+            String correctedLocation = correctOcrLocation(normalized);
+
+            if(correctedLocation != null){
+                locations.add(correctedLocation);
             }
         }
     }
@@ -418,15 +428,75 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /*
-         * Warehouse location format:
-         * DS28-03-01-04A
+         * Exact warehouse location formats:
          *
-         * Allows similar structured locations while rejecting
-         * ordinary words and random OCR sentences.
+         * 1. DSXXX-XX-XX-XXZ
+         * 2. DSXXX-CHR-XX-XXZ
+         * 3. DSXXX-FZR-XX-XXZ
+         * 4. DSXXX-MDRXX-XXZ
+         * 5. DSXXX-HDRXX-XXZ
+         * 6. DSXXX-BSKTXX-XX
+         * 7. DSXXX-HOOKXX-XXZ
+         *
+         * X = 0-9
+         * Z = A-H
+         * DS = constant
          */
         return value.matches(
-            "(?i)[A-Z]{1,4}\\d{1,4}(?:-[A-Z0-9]{1,6}){2,5}"
+            "(?i)"
+            + "(?:"
+            + "DS\\d{2,3}-\\d{2}-\\d{2}-\\d{2}[A-H]"
+            + "|DS\\d{2,3}-CHR-\\d{2}-\\d{2}[A-H]"
+            + "|DS\\d{2,3}-FZR-\\d{2}-\\d{2}[A-H]"
+            + "|DS\\d{2,3}-MDR\\d{2}-\\d{2}[A-H]"
+            + "|DS\\d{2,3}-HDR\\d{2}-\\d{2}[A-H]"
+            + "|DS\\d{2,3}-BSKT\\d{2}-\\d{2}"
+            + "|DS\\d{2,3}-HOOK\\d{2}-\\d{2}[A-H]"
+            + ")"
         );
+    }
+
+
+    String correctOcrLocation(String value){
+
+        if(value == null || value.isEmpty()){
+            return null;
+        }
+
+        String normalized = value
+            .toUpperCase(java.util.Locale.US)
+            .replaceAll("\\s+", "");
+
+        /*
+         * First accept an already-valid location exactly as OCR read it.
+         */
+        if(isLocation(normalized)){
+            return normalized;
+        }
+
+        /*
+         * OCR commonly reads the digit '1' as the letter 'T'.
+         *
+         * Only correct T when it occupies a numeric position
+         * in the DSXXX section. The result must then pass the
+         * strict location validator.
+         *
+         * Example:
+         * DST20-04-02-02C
+         *       ↓
+         * DS120-04-02-02C
+         */
+        if(normalized.matches(
+                "(?i)DST\\d{2}-\\d{2}-\\d{2}-\\d{2}[A-H]"
+        )){
+            String corrected = "DS1" + normalized.substring(3);
+
+            if(isLocation(corrected)){
+                return corrected;
+            }
+        }
+
+        return null;
     }
 
 
