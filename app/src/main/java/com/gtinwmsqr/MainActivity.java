@@ -2,6 +2,7 @@ package com.gtinwmsqr;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -37,8 +38,9 @@ import java.io.*; import java.util.*; import java.util.concurrent.*;
 
 public class MainActivity extends AppCompatActivity {
     static final int REQ=1001;
+    static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
-    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     LinearLayout ocrQrContainer;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
@@ -56,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
         wmsModeButton=findViewById(R.id.wmsModeButton);
         textQrModeButton=findViewById(R.id.textQrModeButton);
         changeModeButton=findViewById(R.id.changeModeButton);
+        importCatalogButton=findViewById(R.id.importCatalogButton);
 
         changeModeButton.setOnClickListener(v->showModeScreen());
+        importCatalogButton.setOnClickListener(v->openCatalogPicker());
 
         wmsModeButton.setOnClickListener(v->{textQrMode=false;openScannerMode();});
         textQrModeButton.setOnClickListener(v->{textQrMode=true;openScannerMode();});
@@ -97,7 +101,224 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void loadCatalog(){try(InputStream is=getAssets().open("catalog.json")){String s=new String(readAll(is),java.nio.charset.StandardCharsets.UTF_8);JSONArray a=new JSONArray(s);for(int i=0;i<a.length();i++){Product p=new Product(a.getJSONObject(i));products.put(p.gtin.trim(),p);} }catch(Exception e){status.setText("Catalog load error: "+e.getMessage());}}
+    void loadCatalog(){
+        File imported = new File(getFilesDir(),"imported_catalog.json");
+
+        try{
+            if(imported.exists()){
+                String s = new String(
+                    readAll(new FileInputStream(imported)),
+                    java.nio.charset.StandardCharsets.UTF_8
+                );
+
+                Map<String,Product> importedProducts =
+                    parseCatalog(s);
+
+                products.clear();
+                products.putAll(importedProducts);
+
+                status.setText(
+                    "Imported catalog loaded: "
+                    + products.size()
+                    + " products"
+                );
+
+                return;
+            }
+
+            try(InputStream is=getAssets().open("catalog.json")){
+                String s=new String(
+                    readAll(is),
+                    java.nio.charset.StandardCharsets.UTF_8
+                );
+
+                Map<String,Product> bundledProducts =
+                    parseCatalog(s);
+
+                products.clear();
+                products.putAll(bundledProducts);
+            }
+
+        }catch(Exception e){
+            status.setText(
+                "Catalog load error: " + e.getMessage()
+            );
+        }
+    }
+
+
+    Map<String,Product> parseCatalog(String json) throws Exception{
+
+        JSONArray a = new JSONArray(json);
+
+        if(a.length() == 0){
+            throw new Exception("Catalog is empty");
+        }
+
+        Map<String,Product> parsed = new HashMap<>();
+
+        for(int i=0;i<a.length();i++){
+
+            JSONObject object = a.getJSONObject(i);
+            Product p = new Product(object);
+
+            String gtin =
+                p.gtin == null ? "" : p.gtin.trim();
+
+            String wms =
+                p.wms == null ? "" : p.wms.trim();
+
+            if(gtin.isEmpty()){
+                throw new Exception(
+                    "Missing pbarcode_canonical at row "
+                    + (i + 1)
+                );
+            }
+
+            if(wms.isEmpty()){
+                throw new Exception(
+                    "Missing wms_barcode at row "
+                    + (i + 1)
+                );
+            }
+
+            p.gtin = gtin;
+            p.wms = wms;
+
+            parsed.put(gtin,p);
+        }
+
+        return parsed;
+    }
+
+
+    void openCatalogPicker(){
+
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+        intent.setType("application/json");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        startActivityForResult(intent,CATALOG_REQUEST);
+    }
+
+
+    @Override
+    protected void onActivityResult(
+        int requestCode,
+        int resultCode,
+        Intent data){
+
+        super.onActivityResult(
+            requestCode,
+            resultCode,
+            data
+        );
+
+        if(requestCode != CATALOG_REQUEST
+                || resultCode != RESULT_OK
+                || data == null
+                || data.getData() == null){
+
+            return;
+        }
+
+        try{
+
+            String json;
+
+            try(InputStream is =
+                    getContentResolver().openInputStream(data.getData())){
+
+                if(is == null){
+                    throw new Exception(
+                        "Unable to open selected file"
+                    );
+                }
+
+                json = new String(
+                    readAll(is),
+                    java.nio.charset.StandardCharsets.UTF_8
+                );
+            }
+
+            Map<String,Product> newProducts =
+                parseCatalog(json);
+
+            File destination =
+                new File(
+                    getFilesDir(),
+                    "imported_catalog.json"
+                );
+
+            File temporary =
+                new File(
+                    getFilesDir(),
+                    "imported_catalog.json.tmp"
+                );
+
+            try(FileOutputStream out =
+                    new FileOutputStream(temporary)){
+
+                out.write(
+                    json.getBytes(
+                        java.nio.charset.StandardCharsets.UTF_8
+                    )
+                );
+
+                out.flush();
+            }
+
+            if(destination.exists()
+                    && !destination.delete()){
+
+                throw new Exception(
+                    "Could not replace previous catalog"
+                );
+            }
+
+            if(!temporary.renameTo(destination)){
+
+                throw new Exception(
+                    "Could not save imported catalog"
+                );
+            }
+
+            int oldCount = products.size();
+
+            products.clear();
+            products.putAll(newProducts);
+
+            status.setText(
+                "Catalog updated: "
+                + products.size()
+                + " products"
+            );
+
+            Toast.makeText(
+                this,
+                "Catalog imported successfully: "
+                + products.size()
+                + " products",
+                Toast.LENGTH_LONG
+            ).show();
+
+        }catch(Exception e){
+
+            Toast.makeText(
+                this,
+                "Catalog import failed: "
+                + e.getMessage(),
+                Toast.LENGTH_LONG
+            ).show();
+
+            status.setText(
+                "Catalog import failed"
+            );
+        }
+    }
+
+
     byte[] readAll(InputStream i)throws IOException{ByteArrayOutputStream o=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=i.read(b))>0)o.write(b,0,n);return o.toByteArray();}
     void toggleTorch(){
         if(activeCamera==null){ Toast.makeText(this,"Camera is still starting",Toast.LENGTH_SHORT).show(); return; }
@@ -501,6 +722,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    String normalizeTextQrGtin(String value){
+
+        if(value == null){
+            return "";
+        }
+
+        String normalized = value.trim();
+
+        while(normalized.length() > 1
+                && normalized.charAt(0) == '0'){
+
+            normalized = normalized.substring(1);
+        }
+
+        return normalized;
+    }
+
+
     void showOcrResults(
         java.util.ArrayList<String> gtins,
         java.util.ArrayList<String> wmsCodes,
@@ -552,7 +791,10 @@ public class MainActivity extends AppCompatActivity {
          * 3. LOCATION
          */
         for(String value : gtins){
-            addOcrQrCard("GTIN / P-BARCODE", value);
+            addOcrQrCard(
+                "GTIN / P-BARCODE",
+                normalizeTextQrGtin(value)
+            );
         }
 
         for(String value : wmsCodes){
