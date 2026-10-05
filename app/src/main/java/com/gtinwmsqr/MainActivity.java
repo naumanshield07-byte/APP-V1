@@ -822,25 +822,28 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(18,18,18,18);
-        card.setBackgroundColor(Color.BLACK);
+        card.setBackgroundResource(R.drawable.glow_card);
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.rgb(255,193,7));
+        title.setTextColor(Color.parseColor("#FFFC5C"));
         title.setTextSize(17);
         title.setTypeface(null,android.graphics.Typeface.BOLD);
+        title.setGravity(android.view.Gravity.CENTER);
 
         TextView content = new TextView(this);
         content.setText(value);
         content.setTextColor(Color.WHITE);
         content.setTextSize(16);
-        content.setPadding(0,8,0,8);
+        content.setGravity(android.view.Gravity.CENTER);
+        content.setPadding(0,10,0,10);
 
         ImageView image = new ImageView(this);
         image.setLayoutParams(
             new LinearLayout.LayoutParams(280,280)
         );
         image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        image.setBackgroundColor(Color.WHITE);
 
         try{
             image.setImageBitmap(makeQr(value,800));
@@ -851,7 +854,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         LinearLayout actions = createActionRow(
-            () -> copyValue(content.getText().toString()),
             () -> editValueDialog(
                 "Edit " + type,
                 content.getText().toString(),
@@ -877,10 +879,36 @@ public class MainActivity extends AppCompatActivity {
                         );
                     }
                 }
-            )
+            ),
+            () -> copyValue(content.getText().toString())
         );
 
         card.addView(title);
+
+        TextView qrGenerated = new TextView(this);
+        qrGenerated.setText("QR GENERATED");
+        qrGenerated.setTextColor(Color.BLACK);
+        qrGenerated.setTextSize(15);
+        qrGenerated.setTypeface(
+            null,
+            android.graphics.Typeface.BOLD
+        );
+        qrGenerated.setGravity(android.view.Gravity.CENTER);
+        qrGenerated.setPadding(16,10,16,10);
+        qrGenerated.setBackgroundResource(
+            R.drawable.glow_button
+        );
+
+        LinearLayout.LayoutParams qrTitleParams =
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+
+        qrTitleParams.gravity = android.view.Gravity.CENTER;
+        qrTitleParams.setMargins(0,10,0,10);
+
+        card.addView(qrGenerated,qrTitleParams);
         card.addView(content);
         card.addView(image);
         card.addView(actions);
@@ -961,12 +989,8 @@ public class MainActivity extends AppCompatActivity {
         manualPanel.setVisibility(View.GONE);
         resultScroll.setVisibility(View.VISIBLE);
 
-        info.setText(
-            "GTIN / pbarcode_canonical:  "+p.gtin+
-            "\nWMS barcode:  "+p.wms+
-            "\nPartner ID:  "+p.partner+
-            "\nStatus:  "+p.status
-        );
+        info.setText("");
+        info.setVisibility(View.GONE);
 
         addFeature1Actions(p);
 
@@ -982,36 +1006,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     LinearLayout createActionRow(
-        Runnable copyAction,
-        Runnable editAction){
+        Runnable editAction,
+        Runnable copyAction){
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(android.view.Gravity.CENTER);
-        row.setPadding(0,8,0,4);
-
-        TextView copy = new TextView(this);
-        copy.setText("⧉  COPY");
-        copy.setTextColor(Color.rgb(255,193,7));
-        copy.setTextSize(15);
-        copy.setTypeface(null,android.graphics.Typeface.BOLD);
-        copy.setGravity(android.view.Gravity.CENTER);
-        copy.setPadding(18,12,18,12);
-
-        copy.setOnClickListener(v -> copyAction.run());
+        row.setPadding(0,6,0,4);
 
         TextView edit = new TextView(this);
         edit.setText("✎  EDIT");
-        edit.setTextColor(Color.rgb(255,193,7));
+        edit.setTextColor(Color.parseColor("#FFFC5C"));
         edit.setTextSize(15);
         edit.setTypeface(null,android.graphics.Typeface.BOLD);
         edit.setGravity(android.view.Gravity.CENTER);
         edit.setPadding(18,12,18,12);
-
+        edit.setBackgroundResource(R.drawable.glow_dark_button);
         edit.setOnClickListener(v -> editAction.run());
 
+        TextView copy = new TextView(this);
+        copy.setText("⧉  COPY");
+        copy.setTextColor(Color.parseColor("#FFFC5C"));
+        copy.setTextSize(15);
+        copy.setTypeface(null,android.graphics.Typeface.BOLD);
+        copy.setGravity(android.view.Gravity.CENTER);
+        copy.setPadding(18,12,18,12);
+        copy.setBackgroundResource(R.drawable.glow_dark_button);
+        copy.setOnClickListener(v -> copyAction.run());
+
         row.addView(
-            copy,
+            edit,
             new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1020,7 +1044,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         row.addView(
-            edit,
+            copy,
             new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1099,6 +1123,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        info.setVisibility(View.GONE);
+
         ViewGroup parent =
             (ViewGroup)info.getParent();
 
@@ -1110,25 +1136,28 @@ public class MainActivity extends AppCompatActivity {
         );
 
         wrapper.setTag("feature1Actions");
+        wrapper.setPadding(4,4,4,4);
 
         TextView gtinLabel =
             new TextView(this);
 
-        gtinLabel.setText("SCANNED GTIN");
-        gtinLabel.setTextColor(
-            Color.rgb(255,193,7)
+        gtinLabel.setText(
+            "GTIN/pbarcode_canonical :  " + p.gtin
         );
-        gtinLabel.setTextSize(14);
+        gtinLabel.setTextColor(
+            Color.WHITE
+        );
+        gtinLabel.setTextSize(16);
         gtinLabel.setTypeface(
             null,
             android.graphics.Typeface.BOLD
         );
+        gtinLabel.setPadding(0,4,0,0);
 
         wrapper.addView(gtinLabel);
 
         wrapper.addView(
             createActionRow(
-                () -> copyValue(p.gtin),
                 () -> editValueDialog(
                     "EDIT GTIN",
                     p.gtin,
@@ -1136,31 +1165,31 @@ public class MainActivity extends AppCompatActivity {
                         if(newValue.isEmpty()) return;
                         find(newValue);
                     }
-                )
+                ),
+                () -> copyValue(p.gtin)
             )
         );
 
         TextView wmsLabel =
             new TextView(this);
 
-        wmsLabel.setText("WMS BARCODE");
-        wmsLabel.setTextColor(
-            Color.rgb(255,193,7)
+        wmsLabel.setText(
+            "WMS barcode :  " + p.wms
         );
-        wmsLabel.setTextSize(14);
+        wmsLabel.setTextColor(
+            Color.WHITE
+        );
+        wmsLabel.setTextSize(16);
         wmsLabel.setTypeface(
             null,
             android.graphics.Typeface.BOLD
         );
-        wmsLabel.setPadding(0,12,0,0);
+        wmsLabel.setPadding(0,14,0,0);
 
         wrapper.addView(wmsLabel);
 
         wrapper.addView(
             createActionRow(
-                () -> copyValue(
-                    last == null ? p.wms : last.wms
-                ),
                 () -> editValueDialog(
                     "EDIT WMS",
                     last == null ? p.wms : last.wms,
@@ -1178,16 +1207,7 @@ public class MainActivity extends AppCompatActivity {
                             );
 
                             if(last != null){
-                                info.setText(
-                                    "GTIN / pbarcode_canonical:  "+
-                                    last.gtin+
-                                    "\nWMS barcode:  "+
-                                    last.wms+
-                                    "\nPartner ID:  "+
-                                    last.partner+
-                                    "\nStatus:  "+
-                                    last.status
-                                );
+                                addFeature1Actions(last);
                             }
 
                             status.setText(
@@ -1201,9 +1221,30 @@ public class MainActivity extends AppCompatActivity {
                             );
                         }
                     }
+                ),
+                () -> copyValue(
+                    last == null ? p.wms : last.wms
                 )
             )
         );
+
+        TextView partnerLabel =
+            new TextView(this);
+
+        partnerLabel.setText(
+            "Partner ID :  " + p.partner
+        );
+        partnerLabel.setTextColor(
+            Color.WHITE
+        );
+        partnerLabel.setTextSize(16);
+        partnerLabel.setTypeface(
+            null,
+            android.graphics.Typeface.BOLD
+        );
+        partnerLabel.setPadding(0,14,0,6);
+
+        wrapper.addView(partnerLabel);
 
         int index = parent.indexOfChild(info);
 
@@ -1214,6 +1255,15 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
+        );
+    }
+
+    void updateResultInformation(Product p){
+
+        info.setText(
+            "GTIN/pbarcode_canonical :  " + p.gtin +
+            "\nWMS barcode :  " + p.wms +
+            "\nPartner ID :  " + p.partner
         );
     }
 

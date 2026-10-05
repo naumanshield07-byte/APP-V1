@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#000000"
+    android:background="#080808"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,7 +10,7 @@
         android:id="@+id/modeSelection"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#000000"
+        android:background="#080808"
         android:padding="24dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -26,7 +26,7 @@
 
         <TextView
             android:text="QR GENERATOR"
-            android:textColor="#FFC107"
+            android:textColor="#FFFC5C"
             android:textSize="30sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -37,7 +37,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:gravity="center"
-            android:background="#000000"
+            android:background="#080808"
             android:padding="0dp"
             android:layout_marginTop="55dp"
             android:layout_width="match_parent"
@@ -50,7 +50,7 @@
                 android:textStyle="bold"
                 android:textColor="#000000"
                 android:textSize="17sp"
-                android:backgroundTint="#FFC107"
+                android:background="@drawable/glow_button"
                 android:minHeight="64dp"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"/>
@@ -62,7 +62,7 @@
                 android:textStyle="bold"
                 android:textColor="#000000"
                 android:textSize="17sp"
-                android:backgroundTint="#FFC107"
+                android:background="@drawable/glow_button"
                 android:minHeight="64dp"
                 android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
@@ -72,7 +72,7 @@
 
         <TextView
             android:text="SELECT SCANNING OPTION"
-            android:textColor="#FFC107"
+            android:textColor="#FFFC5C"
             android:textSize="12sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
@@ -88,7 +88,7 @@
             android:textStyle="bold"
             android:textColor="#000000"
             android:textSize="15sp"
-            android:backgroundTint="#FFC107"
+            android:background="@drawable/glow_button"
             android:minHeight="52dp"
             android:layout_marginTop="18dp"
             android:layout_width="match_parent"
@@ -102,7 +102,7 @@
         android:gravity="center_vertical"
         android:paddingStart="18dp"
         android:paddingEnd="12dp"
-        android:background="#000000"
+        android:background="#080808"
         android:layout_width="match_parent"
         android:layout_height="64dp">
 
@@ -115,7 +115,7 @@
 
             <TextView
                 android:text="GTIN → WMS QR"
-                android:textColor="#FFC107"
+                android:textColor="#FFFC5C"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
@@ -123,7 +123,7 @@
 
             <TextView
                 android:text="WAREHOUSE SCANNER"
-                android:textColor="#FFC107"
+                android:textColor="#FFFC5C"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.12"
@@ -136,7 +136,7 @@
             android:src="@android:drawable/ic_menu_camera"
             android:contentDescription="Toggle flashlight"
             android:background="@android:color/transparent"
-            android:tint="#FFC107"
+            android:tint="#FFFC5C"
             android:padding="10dp"
             android:layout_width="52dp"
             android:layout_height="52dp"/>
@@ -145,7 +145,7 @@
     <!-- CAMERA / SCANNER -->
     <FrameLayout
         android:id="@+id/cameraCard"
-        android:background="#000000"
+        android:background="#080808"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -166,7 +166,7 @@
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="#000000"
-            android:backgroundTint="#FFC107"
+            android:background="@drawable/glow_button"
             android:minHeight="48dp"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
@@ -179,11 +179,11 @@
         <TextView
             android:id="@+id/cameraHint"
             android:text="SCAN PRODUCT GTIN"
-            android:textColor="#FFC107"
+            android:textColor="#FFFC5C"
             android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="#000000"
+            android:background="#080808"
             android:padding="12dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="82dp"
@@ -196,7 +196,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="#000000"
+            android:background="#080808"
             android:padding="8dp"
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
@@ -208,7 +208,7 @@
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:backgroundTint="#FFC107"
+                android:background="@drawable/glow_button"
                 android:minHeight="52dp"
                 android:minWidth="220dp"
                 android:paddingStart="18dp"
@@ -224,7 +224,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="12dp"
-        android:background="#000000"
+        android:background="#080808"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -232,13 +232,13 @@
         <EditText
             android:id="@+id/gtinInput"
             android:hint="Enter / paste GTIN"
-            android:textColorHint="#FFC107"
-            android:textColor="#FFC107"
+            android:textColorHint="#FFFC5C"
+            android:textColor="#FFFC5C"
             android:inputType="number"
             android:singleLine="true"
             android:textSize="17sp"
             android:padding="12dp"
-            android:background="#000000"
+            android:background="#080808"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="56dp"/>
@@ -249,7 +249,7 @@
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="#000000"
-            android:backgroundTint="#FFC107"
+            android:background="@drawable/glow_button"
             android:minHeight="52dp"
             android:layout_marginStart="10dp"
             android:layout_width="92dp"
@@ -260,7 +260,7 @@
     <ScrollView
         android:id="@+id/resultScroll"
         android:fillViewport="true"
-        android:background="#000000"
+        android:background="#080808"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -268,7 +268,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:padding="16dp"
-            android:background="#000000"
+            android:background="#080808"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -276,22 +276,24 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:padding="18dp"
-                android:background="#000000"
+                android:background="@drawable/glow_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/resultTitle"
-                    android:text="Product found"
+                    android:text="PRODUCT FOUND"
+                    android:gravity="center"
+                    android:layout_gravity="center"
                     android:textSize="21sp"
                     android:textStyle="bold"
-                    android:textColor="#FFC107"
-                    android:layout_width="wrap_content"
+                    android:textColor="#FFFC5C"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
                 <TextView
                     android:id="@+id/productInfo"
-                    android:textColor="#FFC107"
+                    android:textColor="#FFFC5C"
                     android:textSize="16sp"
                     android:layout_marginTop="14dp"
                     android:lineSpacingExtra="7dp"
@@ -305,13 +307,13 @@
                 android:gravity="center"
                 android:padding="18dp"
                 android:layout_marginTop="14dp"
-                android:background="#000000"
+                android:background="@drawable/glow_qr_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:text="GENERATED WMS QR"
-                    android:textColor="#FFC107"
+                    android:text="QR GENERATED"
+                    android:textColor="#FFFC5C"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.08"
@@ -349,7 +351,7 @@
                     android:textAllCaps="false"
                     android:textStyle="bold"
                     android:textColor="#000000"
-                    android:backgroundTint="#FFC107"
+                    android:background="@drawable/glow_button"
                     android:minHeight="56dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
@@ -361,7 +363,7 @@
                     android:textAllCaps="false"
                     android:textStyle="bold"
                     android:textColor="#000000"
-                    android:backgroundTint="#FFC107"
+                    android:background="@drawable/glow_button"
                     android:minHeight="56dp"
                     android:layout_marginStart="10dp"
                     android:layout_weight="1"
@@ -376,7 +378,7 @@
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:backgroundTint="#FFC107"
+                android:background="@drawable/glow_button"
                 android:minHeight="56dp"
                 android:layout_marginTop="12dp"
                 android:layout_width="match_parent"
@@ -388,11 +390,11 @@
                 android:text="Product not found"
                 android:textSize="17sp"
                 android:textStyle="bold"
-                android:textColor="#FFC107"
+                android:textColor="#FFFC5C"
                 android:visibility="gone"
                 android:layout_marginTop="14dp"
                 android:padding="16dp"
-                android:background="#000000"
+                android:background="#080808"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -403,11 +405,11 @@
     <TextView
         android:id="@+id/statusText"
         android:text="Opening camera…"
-        android:textColor="#FFC107"
+        android:textColor="#FFFC5C"
         android:textSize="12sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:background="#000000"
+        android:background="#080808"
         android:padding="6dp"
         android:layout_width="match_parent"
         android:layout_height="32dp"/>
