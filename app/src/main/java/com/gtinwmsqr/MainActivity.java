@@ -552,25 +552,43 @@ public class MainActivity extends AppCompatActivity {
              * Example:
              * 11649903984P
              */
-            if(isKnownWms(normalized)
-                    || normalized.matches("\\d{8,14}P")){
+            /*
+             * Apply OCR digit-confusion correction only when the
+             * candidate looks numeric. Protects alphanumeric codes.
+             */
+            String correctedValue = normalized;
+            if(looksLikeNumericCandidate(normalized)){
+                correctedValue = fixOcrDigits(normalized);
+            }
 
-                wmsCodes.add(normalized);
+            /* 1. WMS BARCODE */
+            if(isKnownWms(normalized)
+                    || isKnownWms(correctedValue)
+                    || normalized.matches("\\d{8,14}P")
+                    || correctedValue.matches("\\d{8,14}P")){
+
+                wmsCodes.add(correctedValue);
                 continue;
             }
 
-            /*
-             * 2. GTIN / P-BARCODE
-             *
-             * Accept catalog GTIN values AND unknown numeric
-             * GTIN / barcode values.
-             *
-             * Supports 8-14 digit numeric values.
-             */
+            /* 2. GTIN / P-BARCODE (catalog or numeric) */
             if(isKnownGtin(normalized)
-                    || normalized.matches("\\d{8,14}")){
+                    || isKnownGtin(correctedValue)
+                    || normalized.matches("\\d{8,14}")
+                    || correctedValue.matches("\\d{8,14}")){
 
-                gtins.add(normalized);
+                gtins.add(correctedValue);
+                continue;
+            }
+
+            /* 2b. ALPHANUMERIC GTIN (non-catalog, mixed letters+digits) */
+            if(!isLocation(correctedValue)
+                    && correctedValue.matches("[A-Z0-9]{6,20}")
+                    && correctedValue.matches(".*\\d.*")
+                    && correctedValue.matches(".*[A-Z].*")
+                    && !correctedValue.endsWith("P")){
+
+                gtins.add(correctedValue);
                 continue;
             }
 
@@ -641,6 +659,45 @@ public class MainActivity extends AppCompatActivity {
 
         return false;
     }
+
+    /*
+     * OCR commonly swaps visually similar characters.
+     * Fix them only inside digit-intended candidates.
+     */
+    String fixOcrDigits(String value){
+        if(value == null || value.isEmpty()) return value;
+        String upper = value.toUpperCase(java.util.Locale.US);
+        StringBuilder out = new StringBuilder(upper.length());
+        for(int i = 0; i < upper.length(); i++){
+            char c = upper.charAt(i);
+            switch(c){
+                case 'O': case 'Q': case 'D': out.append('0'); break;
+                case 'I': case 'L':           out.append('1'); break;
+                case 'Z':                     out.append('2'); break;
+                case 'S':                     out.append('5'); break;
+                case 'G':                     out.append('6'); break;
+                case 'T':                     out.append('7'); break;
+                case 'B':                     out.append('8'); break;
+                default:                      out.append(c);
+            }
+        }
+        return out.toString();
+    }
+
+    boolean looksLikeNumericCandidate(String value){
+        if(value == null || value.isEmpty()) return false;
+        String v = value.toUpperCase(java.util.Locale.US);
+        int digitish = 0;
+        for(int i = 0; i < v.length(); i++){
+            char c = v.charAt(i);
+            if(Character.isDigit(c)){ digitish++; continue; }
+            if("OQDILZSGTB".indexOf(c) >= 0){ digitish++; continue; }
+            if(c == 'P' && i == v.length() - 1) continue;
+            return false;
+        }
+        return v.length() > 0 && (digitish * 100 / v.length()) >= 70;
+    }
+
 
 
     boolean isLocation(String value){
