@@ -97,7 +97,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void applyStatusBarInset(){
+        try{
+            android.view.View content =
+                findViewById(android.R.id.content);
+
+            if(content == null) return;
+
+            /* Add status-bar height + small breathing room */
+            int paddingTop = getStatusBarHeight()
+                + (int)(8 * getResources().getDisplayMetrics().density);
+
+            content.setPadding(0, paddingTop, 0, 0);
+
+        }catch(Exception ignored){}
+    }
+
+    int getStatusBarHeight(){
+        int id = getResources().getIdentifier(
+            "status_bar_height", "dimen", "android"
+        );
+        if(id > 0){
+            return getResources().getDimensionPixelSize(id);
+        }
+        /* Fallback: ~24dp */
+        return (int)(24 * getResources().getDisplayMetrics().density);
+    }
+
     void bind(){
+        applyStatusBarInset();
         preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo); resultTitle=findViewById(R.id.resultTitle);
         ocrQrContainer=findViewById(R.id.ocrQrContainer);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
