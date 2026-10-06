@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
     static final int REQ=1001;
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
-    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
+    ImageView captureShutter; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     LinearLayout ocrQrContainer;
     java.util.LinkedHashSet<String> bufferedGtins = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedWms = new java.util.LinkedHashSet<>();
@@ -94,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
     }
     void showModeScreen(){
         stopCamera();
+        if(captureShutter != null){
+            captureShutter.setVisibility(View.GONE);
+        }
         modeSelection.setVisibility(View.VISIBLE);
         cameraCard.setVisibility(View.GONE);
         manualPanel.setVisibility(View.GONE);
@@ -111,9 +115,20 @@ public class MainActivity extends AppCompatActivity {
         lastOcrUpdate=0L;
 
         if(textQrMode){
-            manualButton.setText("CAPTURE");
-        } else if(manualButtonOriginalText != null){
-            manualButton.setText(manualButtonOriginalText);
+            manualButton.setVisibility(View.GONE);
+            setupCaptureShutter();
+            if(captureShutter.getParent() == null){
+                cameraCard.addView(captureShutter);
+            }
+            captureShutter.setVisibility(View.VISIBLE);
+        } else {
+            if(captureShutter != null){
+                captureShutter.setVisibility(View.GONE);
+            }
+            manualButton.setVisibility(View.VISIBLE);
+            if(manualButtonOriginalText != null){
+                manualButton.setText(manualButtonOriginalText);
+            }
         }
         modeSelection.setVisibility(View.GONE);
         cameraCard.setVisibility(View.VISIBLE);
@@ -421,6 +436,29 @@ public class MainActivity extends AppCompatActivity {
                 status.setText("Camera error: "+e.getMessage());
             }
         },ContextCompat.getMainExecutor(this));
+    }
+
+    void setupCaptureShutter(){
+
+        if(captureShutter != null) return;
+
+        float density = getResources().getDisplayMetrics().density;
+        int size = (int)(88 * density);
+        int bottomMargin = (int)(32 * density);
+
+        captureShutter = new ImageView(this);
+        captureShutter.setImageResource(R.drawable.capture_shutter_selector);
+        captureShutter.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        captureShutter.setClickable(true);
+        captureShutter.setContentDescription("Capture");
+        captureShutter.setOnClickListener(v -> captureOcrResults());
+
+        FrameLayout.LayoutParams lp =
+            new FrameLayout.LayoutParams(size, size);
+        lp.gravity = android.view.Gravity.BOTTOM
+                   | android.view.Gravity.CENTER_HORIZONTAL;
+        lp.bottomMargin = bottomMargin;
+        captureShutter.setLayoutParams(lp);
     }
 
     void captureOcrResults(){
