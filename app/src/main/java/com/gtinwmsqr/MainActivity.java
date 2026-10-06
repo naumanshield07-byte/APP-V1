@@ -951,14 +951,23 @@ public class MainActivity extends AppCompatActivity {
         content.setPadding(0,10,0,10);
 
         ImageView image = new ImageView(this);
-        image.setLayoutParams(
-            new LinearLayout.LayoutParams(280,280)
-        );
-        image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        LinearLayout.LayoutParams imgParams =
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                600
+            );
+
+        imgParams.setMargins(20, 16, 20, 16);
+        imgParams.gravity = android.view.Gravity.CENTER;
+
+        image.setLayoutParams(imgParams);
+        image.setScaleType(ImageView.ScaleType.FIT_CENTER);
         image.setBackgroundColor(Color.WHITE);
+        image.setAdjustViewBounds(true);
 
         try{
-            image.setImageBitmap(makeQr(value,800));
+            image.setImageBitmap(makeQr(value,1200));
         }catch(Exception e){
             content.setText(
                 value + "\n\nQR error: " + e.getMessage()
@@ -978,7 +987,7 @@ public class MainActivity extends AppCompatActivity {
 
                     try{
                         image.setImageBitmap(
-                            makeQr(updated,800)
+                            makeQr(updated,1200)
                         );
 
                         status.setText(
