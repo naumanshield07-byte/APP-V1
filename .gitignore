@@ -15,3 +15,7 @@ local.properties
 # IDE
 .idea/
 *.iml
+
+# Local backups
+app/src/main/res/drawable_backup/
+app/src/main/res/values_backup/

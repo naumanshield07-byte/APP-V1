@@ -1,10 +1,13 @@
 <resources>
-    <color name="blue">#FFFC5C</color>
-    <color name="blue_light">#FFFC5C</color>
+    <color name="blue">#FCFC3D</color>
+    <color name="blue_light">#FCFC3D</color>
     <color name="light">#F3F4F6</color>
     <color name="white">#FFFFFF</color>
     <color name="text">#000000</color>
     <color name="muted">#64748B</color>
     <color name="green">#166534</color>
     <color name="green_bg">#DCFCE7</color>
+    <color name="theme_yellow">#FCFC3D</color>
+    <color name="theme_black">#000000</color>
+    <color name="theme_bg">#080808</color>
 </resources>

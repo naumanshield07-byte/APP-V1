@@ -444,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
 
         float density = getResources().getDisplayMetrics().density;
         int size = (int)(88 * density);
-        int bottomMargin = (int)(32 * density);
+        int bottomMargin = (int)(140 * density);
 
         captureShutter = new ImageView(this);
         captureShutter.setImageResource(R.drawable.capture_shutter_selector);
@@ -1063,14 +1063,14 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.parseColor("#FFFC5C"));
+        title.setTextColor(Color.parseColor("#000000"));
         title.setTextSize(17);
         title.setTypeface(null,android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
 
         TextView content = new TextView(this);
         content.setText(value);
-        content.setTextColor(Color.WHITE);
+        content.setTextColor(Color.parseColor("#000000"));
         content.setTextSize(16);
         content.setGravity(android.view.Gravity.CENTER);
         content.setPadding(0,10,0,10);
@@ -1262,7 +1262,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView edit = new TextView(this);
         edit.setText("✎  EDIT");
-        edit.setTextColor(Color.parseColor("#FFFC5C"));
+        edit.setTextColor(Color.parseColor("#000000"));
         edit.setTextSize(15);
         edit.setTypeface(null,android.graphics.Typeface.BOLD);
         edit.setGravity(android.view.Gravity.CENTER);
@@ -1272,7 +1272,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView copy = new TextView(this);
         copy.setText("⧉  COPY");
-        copy.setTextColor(Color.parseColor("#FFFC5C"));
+        copy.setTextColor(Color.parseColor("#000000"));
         copy.setTextSize(15);
         copy.setTypeface(null,android.graphics.Typeface.BOLD);
         copy.setGravity(android.view.Gravity.CENTER);
@@ -1390,9 +1390,7 @@ public class MainActivity extends AppCompatActivity {
         gtinLabel.setText(
             "GTIN/pbarcode_canonical :  " + p.gtin
         );
-        gtinLabel.setTextColor(
-            Color.WHITE
-        );
+        gtinLabel.setTextColor(Color.parseColor("#000000"));
         gtinLabel.setTextSize(16);
         gtinLabel.setTypeface(
             null,
@@ -1422,9 +1420,7 @@ public class MainActivity extends AppCompatActivity {
         wmsLabel.setText(
             "WMS barcode :  " + p.wms
         );
-        wmsLabel.setTextColor(
-            Color.WHITE
-        );
+        wmsLabel.setTextColor(Color.parseColor("#000000"));
         wmsLabel.setTextSize(16);
         wmsLabel.setTypeface(
             null,
@@ -1480,9 +1476,7 @@ public class MainActivity extends AppCompatActivity {
         partnerLabel.setText(
             "Partner ID :  " + p.partner
         );
-        partnerLabel.setTextColor(
-            Color.WHITE
-        );
+        partnerLabel.setTextColor(Color.parseColor("#000000"));
         partnerLabel.setTextSize(16);
         partnerLabel.setTypeface(
             null,
