@@ -1063,25 +1063,26 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.parseColor("#000000"));
+        title.setTextColor(Color.parseColor("#FCFC3D"));
         title.setTextSize(17);
         title.setTypeface(null,android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
 
         TextView content = new TextView(this);
         content.setText(value);
-        content.setTextColor(Color.parseColor("#000000"));
+        content.setTextColor(Color.WHITE);
         content.setTextSize(16);
         content.setGravity(android.view.Gravity.CENTER);
         content.setPadding(0,10,0,10);
 
         ImageView image = new ImageView(this);
 
+        /* Square QR tile - 320dp on each side, centered. */
+        int qrSide = (int)(320 * getResources()
+                              .getDisplayMetrics().density);
+
         LinearLayout.LayoutParams imgParams =
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                600
-            );
+            new LinearLayout.LayoutParams(qrSide, qrSide);
 
         imgParams.setMargins(20, 16, 20, 16);
         imgParams.gravity = android.view.Gravity.CENTER;
@@ -1089,7 +1090,6 @@ public class MainActivity extends AppCompatActivity {
         image.setLayoutParams(imgParams);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
         image.setBackgroundColor(Color.WHITE);
-        image.setAdjustViewBounds(true);
 
         try{
             image.setImageBitmap(makeQr(value,1200));
@@ -1262,7 +1262,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView edit = new TextView(this);
         edit.setText("✎  EDIT");
-        edit.setTextColor(Color.parseColor("#000000"));
+        edit.setTextColor(Color.parseColor("#FCFC3D"));
         edit.setTextSize(15);
         edit.setTypeface(null,android.graphics.Typeface.BOLD);
         edit.setGravity(android.view.Gravity.CENTER);
@@ -1272,7 +1272,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView copy = new TextView(this);
         copy.setText("⧉  COPY");
-        copy.setTextColor(Color.parseColor("#000000"));
+        copy.setTextColor(Color.parseColor("#FCFC3D"));
         copy.setTextSize(15);
         copy.setTypeface(null,android.graphics.Typeface.BOLD);
         copy.setGravity(android.view.Gravity.CENTER);
@@ -1390,7 +1390,7 @@ public class MainActivity extends AppCompatActivity {
         gtinLabel.setText(
             "GTIN/pbarcode_canonical :  " + p.gtin
         );
-        gtinLabel.setTextColor(Color.parseColor("#000000"));
+        gtinLabel.setTextColor(Color.WHITE);
         gtinLabel.setTextSize(16);
         gtinLabel.setTypeface(
             null,
@@ -1420,7 +1420,7 @@ public class MainActivity extends AppCompatActivity {
         wmsLabel.setText(
             "WMS barcode :  " + p.wms
         );
-        wmsLabel.setTextColor(Color.parseColor("#000000"));
+        wmsLabel.setTextColor(Color.WHITE);
         wmsLabel.setTextSize(16);
         wmsLabel.setTypeface(
             null,
@@ -1476,7 +1476,7 @@ public class MainActivity extends AppCompatActivity {
         partnerLabel.setText(
             "Partner ID :  " + p.partner
         );
-        partnerLabel.setTextColor(Color.parseColor("#000000"));
+        partnerLabel.setTextColor(Color.WHITE);
         partnerLabel.setTextSize(16);
         partnerLabel.setTypeface(
             null,
