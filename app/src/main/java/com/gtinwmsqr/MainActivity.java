@@ -54,11 +54,48 @@ public class MainActivity extends AppCompatActivity {
     static final int VOTE_THRESHOLD = 2;
     volatile long lastOcrUpdate = 0L;
     String manualButtonOriginalText = null;
+    static class HistoryEntry {
+        String type;    // "GTIN" | "WMS" | "LOCATION"
+        String value;
+        String source;  // "scan" | "OCR" | "lookup"
+        long ts;
+    }
+    java.util.ArrayList<HistoryEntry> historyEntries = new java.util.ArrayList<>();
+    LinearLayout historyPanel;
+    LinearLayout historyList;
+    ScrollView historyScroll;
+
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
         textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
         showModeScreen();}
+
+    void addHistoryButton(){
+        try{
+            ViewGroup container = (ViewGroup) wmsModeButton.getParent();
+            if(container == null) return;
+
+            Button historyBtn = new Button(this);
+            historyBtn.setText("HISTORY");
+            historyBtn.setAllCaps(false);
+            historyBtn.setTextColor(Color.parseColor("#000000"));
+            historyBtn.setTextSize(17);
+            historyBtn.setTypeface(null, android.graphics.Typeface.BOLD);
+            historyBtn.setBackgroundResource(R.drawable.glow_button);
+            historyBtn.setMinHeight((int)(64 * getResources().getDisplayMetrics().density));
+            historyBtn.setOnClickListener(v -> openHistory());
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                (int)(64 * getResources().getDisplayMetrics().density)
+            );
+            lp.topMargin = (int)(8 * getResources().getDisplayMetrics().density);
+            container.addView(historyBtn, lp);
+        }catch(Exception e){
+            status.setText("History button error: " + e.getMessage());
+        }
+    }
 
     void bind(){
         preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo); resultTitle=findViewById(R.id.resultTitle);
@@ -92,6 +129,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         flashButton.setOnClickListener(v->toggleTorch());
+
+        addHistoryButton();
+        loadHistory();
+
+        resultTitle.setTextColor(Color.parseColor("#FCFC3D"));
+        info.setTextColor(Color.parseColor("#FCFC3D"));
+        notFound.setTextColor(Color.parseColor("#FCFC3D"));
     }
     void showModeScreen(){
         stopCamera();
@@ -459,6 +503,238 @@ public class MainActivity extends AppCompatActivity {
                    | android.view.Gravity.CENTER_HORIZONTAL;
         lp.bottomMargin = bottomMargin;
         captureShutter.setLayoutParams(lp);
+    }
+
+    void buildHistoryPanel(){
+        if(historyPanel != null) return;
+
+        historyPanel = new LinearLayout(this);
+        historyPanel.setOrientation(LinearLayout.VERTICAL);
+        historyPanel.setBackgroundColor(Color.parseColor("#080808"));
+        historyPanel.setVisibility(View.GONE);
+
+        /* Header row */
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        header.setPadding(16, 16, 16, 16);
+        header.setBackgroundColor(Color.parseColor("#080808"));
+
+        Button backBtn = new Button(this);
+        backBtn.setText("\u2190");
+        backBtn.setTextSize(22);
+        backBtn.setTextColor(Color.BLACK);
+        backBtn.setBackgroundResource(R.drawable.glow_button);
+        backBtn.setOnClickListener(v -> closeHistory());
+        header.addView(backBtn);
+
+        TextView title = new TextView(this);
+        title.setText("HISTORY");
+        title.setTextColor(Color.parseColor("#FCFC3D"));
+        title.setTextSize(22);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setGravity(android.view.Gravity.CENTER);
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(
+            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
+        );
+        header.addView(title, tp);
+
+        Button clearBtn = new Button(this);
+        clearBtn.setText("CLEAR");
+        clearBtn.setTextSize(14);
+        clearBtn.setTextColor(Color.BLACK);
+        clearBtn.setBackgroundResource(R.drawable.glow_button);
+        clearBtn.setOnClickListener(v -> clearHistory());
+        header.addView(clearBtn);
+
+        historyPanel.addView(header);
+
+        historyScroll = new ScrollView(this);
+        historyScroll.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 0, 1
+        ));
+        historyList = new LinearLayout(this);
+        historyList.setOrientation(LinearLayout.VERTICAL);
+        historyList.setPadding(20, 8, 20, 40);
+        historyScroll.addView(historyList);
+        historyPanel.addView(historyScroll);
+
+        /* Add panel to root FrameLayout (android.R.id.content) */
+        android.widget.FrameLayout content =
+            findViewById(android.R.id.content);
+        content.addView(historyPanel, new android.widget.FrameLayout.LayoutParams(
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+    }
+
+    void openHistory(){
+        buildHistoryPanel();
+        stopCamera();
+        modeSelection.setVisibility(View.GONE);
+        cameraCard.setVisibility(View.GONE);
+        manualPanel.setVisibility(View.GONE);
+        resultScroll.setVisibility(View.GONE);
+        notFound.setVisibility(View.GONE);
+        if(captureShutter != null) captureShutter.setVisibility(View.GONE);
+        historyPanel.setVisibility(View.VISIBLE);
+        renderHistory();
+    }
+
+    void closeHistory(){
+        if(historyPanel != null) historyPanel.setVisibility(View.GONE);
+        showModeScreen();
+    }
+
+    void loadHistory(){
+        try{
+            java.io.File f = new java.io.File(getFilesDir(), "history.json");
+            if(!f.exists()) return;
+            String s = new String(
+                readAll(new java.io.FileInputStream(f)),
+                java.nio.charset.StandardCharsets.UTF_8
+            );
+            org.json.JSONArray arr = new org.json.JSONArray(s);
+            historyEntries.clear();
+            for(int i = 0; i < arr.length(); i++){
+                org.json.JSONObject o = arr.getJSONObject(i);
+                HistoryEntry he = new HistoryEntry();
+                he.type   = o.optString("type");
+                he.value  = o.optString("value");
+                he.source = o.optString("source", "scan");
+                he.ts     = o.optLong("ts");
+                historyEntries.add(he);
+            }
+        }catch(Exception ignored){}
+    }
+
+    void persistHistory(){
+        try{
+            org.json.JSONArray arr = new org.json.JSONArray();
+            for(HistoryEntry he : historyEntries){
+                org.json.JSONObject o = new org.json.JSONObject();
+                o.put("type",   he.type);
+                o.put("value",  he.value);
+                o.put("source", he.source);
+                o.put("ts",     he.ts);
+                arr.put(o);
+            }
+            try(java.io.FileOutputStream out = new java.io.FileOutputStream(
+                    new java.io.File(getFilesDir(), "history.json"))){
+                out.write(arr.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                out.flush();
+            }
+        }catch(Exception ignored){}
+    }
+
+    void saveHistoryEntry(String type, String value, String source){
+        if(value == null || value.isEmpty()) return;
+
+        long now = System.currentTimeMillis();
+        long dedupeWindow = 30L * 60L * 1000L;  /* 30 min */
+
+        /* Remove recent duplicates of same type+value */
+        for(int i = historyEntries.size() - 1; i >= 0; i--){
+            HistoryEntry he = historyEntries.get(i);
+            if(he.type.equals(type) && he.value.equals(value)
+                    && (now - he.ts) < dedupeWindow){
+                historyEntries.remove(i);
+            }
+        }
+
+        HistoryEntry he = new HistoryEntry();
+        he.type = type; he.value = value; he.source = source; he.ts = now;
+        historyEntries.add(0, he);
+
+        while(historyEntries.size() > 50){
+            historyEntries.remove(historyEntries.size() - 1);
+        }
+
+        persistHistory();
+    }
+
+    void clearHistory(){
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Clear history?")
+            .setMessage("This removes all saved scan history.")
+            .setNegativeButton("CANCEL", null)
+            .setPositiveButton("CLEAR", (d, w) -> {
+                historyEntries.clear();
+                persistHistory();
+                renderHistory();
+            })
+            .show();
+    }
+
+    void renderHistory(){
+        if(historyList == null) return;
+        historyList.removeAllViews();
+
+        if(historyEntries.isEmpty()){
+            TextView empty = new TextView(this);
+            empty.setText("No history yet.\n\nScanned and OCR-detected values will appear here.");
+            empty.setTextColor(Color.parseColor("#FCFC3D"));
+            empty.setTextSize(15);
+            empty.setGravity(android.view.Gravity.CENTER);
+            empty.setPadding(20, 80, 20, 20);
+            historyList.addView(empty);
+            return;
+        }
+
+        for(HistoryEntry he : historyEntries){
+            historyList.addView(buildHistoryCard(he));
+        }
+    }
+
+    View buildHistoryCard(HistoryEntry he){
+
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(24, 20, 24, 20);
+        card.setBackgroundResource(R.drawable.glow_card);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        lp.setMargins(0, 0, 0, 16);
+        card.setLayoutParams(lp);
+
+        TextView t = new TextView(this);
+        t.setText(he.type);
+        t.setTextColor(Color.parseColor("#FCFC3D"));
+        t.setTextSize(12);
+        t.setTypeface(null, android.graphics.Typeface.BOLD);
+        t.setLetterSpacing(0.1f);
+        card.addView(t);
+
+        TextView v = new TextView(this);
+        v.setText(he.value);
+        v.setTextColor(Color.WHITE);
+        v.setTextSize(18);
+        v.setTypeface(null, android.graphics.Typeface.BOLD);
+        v.setPadding(0, 8, 0, 8);
+        card.addView(v);
+
+        TextView ts = new TextView(this);
+        ts.setText(formatTime(he.ts) + "   \u2022   " + he.source);
+        ts.setTextColor(Color.parseColor("#999999"));
+        ts.setTextSize(11);
+        card.addView(ts);
+
+        card.setOnClickListener(x -> copyValue(he.value));
+
+        return card;
+    }
+
+    String formatTime(long ts){
+        long diff = System.currentTimeMillis() - ts;
+        if(diff < 60_000L)     return "just now";
+        if(diff < 3_600_000L)  return (diff / 60_000L) + "m ago";
+        if(diff < 86_400_000L) return (diff / 3_600_000L) + "h ago";
+        return new java.text.SimpleDateFormat(
+            "MMM d, HH:mm", java.util.Locale.US
+        ).format(new java.util.Date(ts));
     }
 
     void captureOcrResults(){
@@ -1042,6 +1318,10 @@ public class MainActivity extends AppCompatActivity {
             addOcrQrCard("LOCATION", value);
         }
 
+        for(String v : gtins)     saveHistoryEntry("GTIN", v, "OCR");
+        for(String v : wmsCodes)  saveHistoryEntry("WMS", v, "OCR");
+        for(String v : locations) saveHistoryEntry("LOCATION", v, "OCR");
+
         status.setText(
             "OCR complete — "
             + (gtins.size() + wmsCodes.size() + locations.size())
@@ -1231,6 +1511,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         last=p;
+        saveHistoryEntry("GTIN", p.gtin, "lookup");
         stopCamera();
         cameraCard.setVisibility(View.GONE);
         manualPanel.setVisibility(View.GONE);
@@ -1411,7 +1692,7 @@ public class MainActivity extends AppCompatActivity {
         gtinLabel.setText(
             "GTIN/pbarcode_canonical :  " + p.gtin
         );
-        gtinLabel.setTextColor(Color.WHITE);
+        gtinLabel.setTextColor(Color.parseColor("#FCFC3D"));
         gtinLabel.setTextSize(16);
         gtinLabel.setTypeface(
             null,
@@ -1442,7 +1723,7 @@ public class MainActivity extends AppCompatActivity {
         wmsLabel.setText(
             "WMS barcode :  " + p.wms
         );
-        wmsLabel.setTextColor(Color.WHITE);
+        wmsLabel.setTextColor(Color.parseColor("#FCFC3D"));
         wmsLabel.setTextSize(16);
         wmsLabel.setTypeface(
             null,
@@ -1502,7 +1783,7 @@ public class MainActivity extends AppCompatActivity {
         partnerLabel.setText(
             "Partner ID :  " + p.partner
         );
-        partnerLabel.setTextColor(Color.WHITE);
+        partnerLabel.setTextColor(Color.parseColor("#FCFC3D"));
         partnerLabel.setTextSize(16);
         partnerLabel.setTypeface(
             null,
