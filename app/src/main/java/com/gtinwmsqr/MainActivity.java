@@ -1126,7 +1126,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             ),
-            () -> copyValue(content.getText().toString())
+            () -> copyValue(content.getText().toString()),
+            () -> shareValue(type, content.getText().toString())
         );
 
         card.addView(title);
@@ -1253,7 +1254,8 @@ public class MainActivity extends AppCompatActivity {
 
     LinearLayout createActionRow(
         Runnable editAction,
-        Runnable copyAction){
+        Runnable copyAction,
+        Runnable shareAction){
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -1291,6 +1293,25 @@ public class MainActivity extends AppCompatActivity {
 
         row.addView(
             copy,
+            new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1
+            )
+        );
+
+        TextView share = new TextView(this);
+        share.setText("⤴  SHARE");
+        share.setTextColor(Color.parseColor("#FFFC5C"));
+        share.setTextSize(15);
+        share.setTypeface(null,android.graphics.Typeface.BOLD);
+        share.setGravity(android.view.Gravity.CENTER);
+        share.setPadding(18,12,18,12);
+        share.setBackgroundResource(R.drawable.glow_dark_button);
+        share.setOnClickListener(v -> shareAction.run());
+
+        row.addView(
+            share,
             new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1410,7 +1431,8 @@ public class MainActivity extends AppCompatActivity {
                         find(newValue);
                     }
                 ),
-                () -> copyValue(p.gtin)
+                () -> copyValue(p.gtin),
+                () -> shareValue("GTIN", p.gtin)
             )
         );
 
@@ -1466,6 +1488,10 @@ public class MainActivity extends AppCompatActivity {
                 ),
                 () -> copyValue(
                     last == null ? p.wms : last.wms
+                ),
+                () -> shareValue(
+                    "WMS",
+                    last == null ? p.wms : last.wms
                 )
             )
         );
@@ -1505,6 +1531,73 @@ public class MainActivity extends AppCompatActivity {
             "\nWMS barcode :  " + p.wms +
             "\nPartner ID :  " + p.partner
         );
+    }
+
+    void shareValue(String label, String value){
+
+        try{
+            /* Render QR bitmap to cache */
+            Bitmap bmp = makeQr(value, 1000);
+
+            java.io.File dir =
+                new java.io.File(getCacheDir(), "qr_share");
+
+            if(!dir.exists()) dir.mkdirs();
+
+            java.io.File file = new java.io.File(
+                dir,
+                "QR_" + System.currentTimeMillis() + ".png"
+            );
+
+            try(java.io.FileOutputStream out =
+                    new java.io.FileOutputStream(file)){
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+                out.flush();
+            }
+
+            android.net.Uri uri =
+                androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".fileprovider",
+                    file
+                );
+
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("image/png");
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            share.putExtra(
+                Intent.EXTRA_TEXT,
+                label + ": " + value
+            );
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(
+                Intent.createChooser(
+                    share,
+                    "Share " + label
+                )
+            );
+
+        }catch(Exception e){
+            /* Fallback: text-only share */
+            try{
+                Intent share = new Intent(Intent.ACTION_SEND);
+                share.setType("text/plain");
+                share.putExtra(
+                    Intent.EXTRA_TEXT,
+                    label + ": " + value
+                );
+                startActivity(
+                    Intent.createChooser(share, "Share " + label)
+                );
+            }catch(Exception e2){
+                Toast.makeText(
+                    this,
+                    "Share failed: " + e2.getMessage(),
+                    Toast.LENGTH_LONG
+                ).show();
+            }
+        }
     }
 
     Bitmap makeQr(String text,int size)throws WriterException{BitMatrix m=new MultiFormatWriter().encode(text,BarcodeFormat.QR_CODE,size,size);Bitmap b=Bitmap.createBitmap(size,size,Bitmap.Config.ARGB_8888);for(int y=0;y<size;y++)for(int x=0;x<size;x++)b.setPixel(x,y,m.get(x,y)?Color.BLACK:Color.WHITE);return b;}

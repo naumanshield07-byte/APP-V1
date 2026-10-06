@@ -4,16 +4,6 @@
     <application
         android:icon="@drawable/qr_generator_logo"
         android:roundIcon="@drawable/qr_generator_logo" android:theme="@style/Theme.GTINWMSQR" android:label="QR SCANNER" android:allowBackup="false" android:supportsRtl="true">
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
-        </provider>
-
         <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/>
