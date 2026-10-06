@@ -457,8 +457,58 @@ public class MainActivity extends AppCompatActivity {
                     image.getImageInfo().getRotationDegrees()
                 );
 
-                textRecognizer.process(imageInput)
-                    .addOnSuccessListener(result -> {
+                /*
+                 * STEP 1: Try the barcode decoder FIRST.
+                 * Barcodes are ~99.9% accurate - use them when available.
+                 * Any successfully decoded value is classified and
+                 * pushed into the same buffers that CAPTURE uses.
+                 */
+                scanner.process(imageInput)
+                    .addOnSuccessListener(barcodes -> {
+
+                        for(com.google.mlkit.vision.barcode.common.Barcode bc : barcodes){
+
+                            String raw = bc.getRawValue();
+                            if(raw == null || raw.trim().isEmpty()) continue;
+
+                            String upper = raw.trim().toUpperCase(java.util.Locale.US);
+
+                            java.util.LinkedHashSet<String> bg =
+                                new java.util.LinkedHashSet<>();
+                            java.util.LinkedHashSet<String> bw =
+                                new java.util.LinkedHashSet<>();
+                            java.util.LinkedHashSet<String> bl =
+                                new java.util.LinkedHashSet<>();
+
+                            classifyOcrLine(upper, bg, bw, bl);
+
+                            if(!bg.isEmpty() || !bw.isEmpty()){
+                                ocrDetected = true;
+                                final String shownValue = upper;
+                                runOnUiThread(() -> {
+                                    bufferedGtins.addAll(bg);
+                                    bufferedWms.addAll(bw);
+                                    int t = bufferedGtins.size()
+                                        + bufferedWms.size()
+                                        + bufferedLocations.size();
+                                    status.setText(
+                                        "Barcode: " + shownValue
+                                        + " | Buffered: " + t
+                                        + " - tap CAPTURE"
+                                    );
+                                });
+                            }
+                        }
+                    })
+                    .addOnCompleteListener(bcTask -> {
+
+                        /*
+                         * STEP 2: Now run OCR on the SAME frame for
+                         * Location labels and any text the barcode
+                         * decoder couldn't read.
+                         */
+                        textRecognizer.process(imageInput)
+                            .addOnSuccessListener(result -> {
 
                         long now = System.currentTimeMillis();
                         if(ocrDetected && now - lastOcrUpdate < 300){
@@ -519,8 +569,9 @@ public class MainActivity extends AppCompatActivity {
 
                         image.close();
 
-                    })
-                    .addOnFailureListener(e -> image.close());
+                            })
+                            .addOnFailureListener(e -> image.close());
+                    });
             }
         );
     }
