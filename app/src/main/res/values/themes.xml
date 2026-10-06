@@ -2,6 +2,7 @@
 <style name="Theme.GTINWMSQR" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     <item name="android:fontFamily">sans</item>
     <item name="android:colorAccent">#FCFC3D</item>
+    <item name="android:colorBackground">#080808</item>
     <item name="colorPrimary">#FCFC3D</item>
     <item name="colorPrimaryVariant">#FCFC3D</item>
     <item name="colorOnPrimary">#000000</item>
@@ -10,8 +11,6 @@
     <item name="colorOnSecondary">#000000</item>
     <item name="colorSurface">#101010</item>
     <item name="colorOnSurface">#FCFC3D</item>
-    <item name="colorBackground">#080808</item>
-    <item name="colorOnBackground">#FCFC3D</item>
     <item name="android:navigationBarColor">#000000</item>
     <item name="android:statusBarColor">#000000</item>
     <item name="android:windowLightStatusBar">false</item>
