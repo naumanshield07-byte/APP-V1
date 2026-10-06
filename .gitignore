@@ -19,3 +19,9 @@ local.properties
 # Local backups
 app/src/main/res/drawable_backup/
 app/src/main/res/values_backup/
+
+# Never allow backup files inside res/ (breaks resource merger)
+app/src/main/res/**/*.bak
+app/src/main/res/**/*.tmp
+app/src/main/res/**/*~
+app/src/main/res/**/*.orig
