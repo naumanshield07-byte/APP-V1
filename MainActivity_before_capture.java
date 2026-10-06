@@ -42,11 +42,6 @@ public class MainActivity extends AppCompatActivity {
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
     LinearLayout ocrQrContainer;
-    java.util.LinkedHashSet<String> bufferedGtins = new java.util.LinkedHashSet<>();
-    java.util.LinkedHashSet<String> bufferedWms = new java.util.LinkedHashSet<>();
-    java.util.LinkedHashSet<String> bufferedLocations = new java.util.LinkedHashSet<>();
-    volatile long lastOcrUpdate = 0L;
-    String manualButtonOriginalText = null;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
         textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
@@ -59,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
-        manualButtonOriginalText=manualButton.getText().toString();
         modeSelection=findViewById(R.id.modeSelection);
         wmsModeButton=findViewById(R.id.wmsModeButton);
         textQrModeButton=findViewById(R.id.textQrModeButton);
@@ -75,15 +69,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.findButton).setOnClickListener(v->find(input.getText().toString()));
         findViewById(R.id.againButton).setOnClickListener(v->{resultScroll.setVisibility(View.GONE);cameraCard.setVisibility(View.VISIBLE);manualPanel.setVisibility(View.GONE);notFound.setVisibility(View.GONE);startCamera();});
         findViewById(R.id.saveButton).setOnClickListener(v->saveQr()); findViewById(R.id.printButton).setOnClickListener(v->printQr());
-        manualButton.setOnClickListener(v->{
-            if(textQrMode){
-                captureOcrResults();
-            } else {
-                manualPanel.setVisibility(View.VISIBLE);
-                input.requestFocus();
-                ((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(input,android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
+        manualButton.setOnClickListener(v->{manualPanel.setVisibility(View.VISIBLE);input.requestFocus();((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(input,android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);});
         flashButton.setOnClickListener(v->toggleTorch());
     }
     void showModeScreen(){
@@ -98,16 +84,6 @@ public class MainActivity extends AppCompatActivity {
 
     void openScannerMode(){
         ocrDetected=false;
-        bufferedGtins.clear();
-        bufferedWms.clear();
-        bufferedLocations.clear();
-        lastOcrUpdate=0L;
-
-        if(textQrMode){
-            manualButton.setText("CAPTURE");
-        } else if(manualButtonOriginalText != null){
-            manualButton.setText(manualButtonOriginalText);
-        }
         modeSelection.setVisibility(View.GONE);
         cameraCard.setVisibility(View.VISIBLE);
         manualPanel.setVisibility(View.GONE);
@@ -416,37 +392,6 @@ public class MainActivity extends AppCompatActivity {
         },ContextCompat.getMainExecutor(this));
     }
 
-    void captureOcrResults(){
-
-        if(bufferedGtins.isEmpty()
-                && bufferedWms.isEmpty()
-                && bufferedLocations.isEmpty()){
-
-            Toast.makeText(
-                this,
-                "Nothing detected yet - hold steady over the label",
-                Toast.LENGTH_SHORT
-            ).show();
-
-            return;
-        }
-
-        java.util.ArrayList<String> g =
-            new java.util.ArrayList<>(bufferedGtins);
-
-        java.util.ArrayList<String> w =
-            new java.util.ArrayList<>(bufferedWms);
-
-        java.util.ArrayList<String> l =
-            new java.util.ArrayList<>(bufferedLocations);
-
-        bufferedGtins.clear();
-        bufferedWms.clear();
-        bufferedLocations.clear();
-
-        showOcrResults(g, w, l);
-    }
-
     void startOcrAnalyzer(ImageAnalysis analysis){
         analysis.setAnalyzer(
             Executors.newSingleThreadExecutor(),
@@ -460,12 +405,10 @@ public class MainActivity extends AppCompatActivity {
                 textRecognizer.process(imageInput)
                     .addOnSuccessListener(result -> {
 
-                        long now = System.currentTimeMillis();
-                        if(ocrDetected && now - lastOcrUpdate < 300){
+                        if(ocrDetected){
                             image.close();
                             return;
                         }
-                        lastOcrUpdate = now;
 
                         java.util.LinkedHashSet<String> gtins =
                             new java.util.LinkedHashSet<>();
@@ -501,20 +444,22 @@ public class MainActivity extends AppCompatActivity {
 
                             ocrDetected = true;
 
-                            runOnUiThread(() -> {
-                                bufferedGtins.addAll(gtins);
-                                bufferedWms.addAll(wmsCodes);
-                                bufferedLocations.addAll(locations);
+                            final java.util.ArrayList<String> finalGtins =
+                                new java.util.ArrayList<>(gtins);
 
-                                int total = bufferedGtins.size()
-                                    + bufferedWms.size()
-                                    + bufferedLocations.size();
+                            final java.util.ArrayList<String> finalWms =
+                                new java.util.ArrayList<>(wmsCodes);
 
-                                status.setText(
-                                    "Buffered: " + total
-                                    + " item(s) - tap CAPTURE to commit"
-                                );
-                            });
+                            final java.util.ArrayList<String> finalLocations =
+                                new java.util.ArrayList<>(locations);
+
+                            runOnUiThread(() ->
+                                showOcrResults(
+                                    finalGtins,
+                                    finalWms,
+                                    finalLocations
+                                )
+                            );
                         }
 
                         image.close();
@@ -607,43 +552,25 @@ public class MainActivity extends AppCompatActivity {
              * Example:
              * 11649903984P
              */
-            /*
-             * Apply OCR digit-confusion correction only when the
-             * candidate looks numeric. Protects alphanumeric codes.
-             */
-            String correctedValue = normalized;
-            if(looksLikeNumericCandidate(normalized)){
-                correctedValue = fixOcrDigits(normalized);
-            }
-
-            /* 1. WMS BARCODE */
             if(isKnownWms(normalized)
-                    || isKnownWms(correctedValue)
-                    || normalized.matches("\\d{8,14}P")
-                    || correctedValue.matches("\\d{8,14}P")){
+                    || normalized.matches("\\d{8,14}P")){
 
-                wmsCodes.add(correctedValue);
+                wmsCodes.add(normalized);
                 continue;
             }
 
-            /* 2. GTIN / P-BARCODE (catalog or numeric) */
+            /*
+             * 2. GTIN / P-BARCODE
+             *
+             * Accept catalog GTIN values AND unknown numeric
+             * GTIN / barcode values.
+             *
+             * Supports 8-14 digit numeric values.
+             */
             if(isKnownGtin(normalized)
-                    || isKnownGtin(correctedValue)
-                    || normalized.matches("\\d{8,14}")
-                    || correctedValue.matches("\\d{8,14}")){
+                    || normalized.matches("\\d{8,14}")){
 
-                gtins.add(correctedValue);
-                continue;
-            }
-
-            /* 2b. ALPHANUMERIC GTIN (non-catalog, mixed letters+digits) */
-            if(!isLocation(correctedValue)
-                    && correctedValue.matches("[A-Z0-9]{6,20}")
-                    && correctedValue.matches(".*\\d.*")
-                    && correctedValue.matches(".*[A-Z].*")
-                    && !correctedValue.endsWith("P")){
-
-                gtins.add(correctedValue);
+                gtins.add(normalized);
                 continue;
             }
 
@@ -714,45 +641,6 @@ public class MainActivity extends AppCompatActivity {
 
         return false;
     }
-
-    /*
-     * OCR commonly swaps visually similar characters.
-     * Fix them only inside digit-intended candidates.
-     */
-    String fixOcrDigits(String value){
-        if(value == null || value.isEmpty()) return value;
-        String upper = value.toUpperCase(java.util.Locale.US);
-        StringBuilder out = new StringBuilder(upper.length());
-        for(int i = 0; i < upper.length(); i++){
-            char c = upper.charAt(i);
-            switch(c){
-                case 'O': case 'Q': case 'D': out.append('0'); break;
-                case 'I': case 'L':           out.append('1'); break;
-                case 'Z':                     out.append('2'); break;
-                case 'S':                     out.append('5'); break;
-                case 'G':                     out.append('6'); break;
-                case 'T':                     out.append('7'); break;
-                case 'B':                     out.append('8'); break;
-                default:                      out.append(c);
-            }
-        }
-        return out.toString();
-    }
-
-    boolean looksLikeNumericCandidate(String value){
-        if(value == null || value.isEmpty()) return false;
-        String v = value.toUpperCase(java.util.Locale.US);
-        int digitish = 0;
-        for(int i = 0; i < v.length(); i++){
-            char c = v.charAt(i);
-            if(Character.isDigit(c)){ digitish++; continue; }
-            if("OQDILZSGTB".indexOf(c) >= 0){ digitish++; continue; }
-            if(c == 'P' && i == v.length() - 1) continue;
-            return false;
-        }
-        return v.length() > 0 && (digitish * 100 / v.length()) >= 70;
-    }
-
 
 
     boolean isLocation(String value){
@@ -934,28 +822,25 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(18,18,18,18);
-        card.setBackgroundResource(R.drawable.glow_card);
+        card.setBackgroundColor(Color.BLACK);
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.parseColor("#FFFC5C"));
+        title.setTextColor(Color.rgb(255,193,7));
         title.setTextSize(17);
         title.setTypeface(null,android.graphics.Typeface.BOLD);
-        title.setGravity(android.view.Gravity.CENTER);
 
         TextView content = new TextView(this);
         content.setText(value);
         content.setTextColor(Color.WHITE);
         content.setTextSize(16);
-        content.setGravity(android.view.Gravity.CENTER);
-        content.setPadding(0,10,0,10);
+        content.setPadding(0,8,0,8);
 
         ImageView image = new ImageView(this);
         image.setLayoutParams(
             new LinearLayout.LayoutParams(280,280)
         );
         image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        image.setBackgroundColor(Color.WHITE);
 
         try{
             image.setImageBitmap(makeQr(value,800));
@@ -966,6 +851,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         LinearLayout actions = createActionRow(
+            () -> copyValue(content.getText().toString()),
             () -> editValueDialog(
                 "Edit " + type,
                 content.getText().toString(),
@@ -991,36 +877,10 @@ public class MainActivity extends AppCompatActivity {
                         );
                     }
                 }
-            ),
-            () -> copyValue(content.getText().toString())
+            )
         );
 
         card.addView(title);
-
-        TextView qrGenerated = new TextView(this);
-        qrGenerated.setText("QR GENERATED");
-        qrGenerated.setTextColor(Color.BLACK);
-        qrGenerated.setTextSize(15);
-        qrGenerated.setTypeface(
-            null,
-            android.graphics.Typeface.BOLD
-        );
-        qrGenerated.setGravity(android.view.Gravity.CENTER);
-        qrGenerated.setPadding(16,10,16,10);
-        qrGenerated.setBackgroundResource(
-            R.drawable.glow_button
-        );
-
-        LinearLayout.LayoutParams qrTitleParams =
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-
-        qrTitleParams.gravity = android.view.Gravity.CENTER;
-        qrTitleParams.setMargins(0,10,0,10);
-
-        card.addView(qrGenerated,qrTitleParams);
         card.addView(content);
         card.addView(image);
         card.addView(actions);
@@ -1101,8 +961,12 @@ public class MainActivity extends AppCompatActivity {
         manualPanel.setVisibility(View.GONE);
         resultScroll.setVisibility(View.VISIBLE);
 
-        info.setText("");
-        info.setVisibility(View.GONE);
+        info.setText(
+            "GTIN / pbarcode_canonical:  "+p.gtin+
+            "\nWMS barcode:  "+p.wms+
+            "\nPartner ID:  "+p.partner+
+            "\nStatus:  "+p.status
+        );
 
         addFeature1Actions(p);
 
@@ -1118,36 +982,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     LinearLayout createActionRow(
-        Runnable editAction,
-        Runnable copyAction){
+        Runnable copyAction,
+        Runnable editAction){
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(android.view.Gravity.CENTER);
-        row.setPadding(0,6,0,4);
-
-        TextView edit = new TextView(this);
-        edit.setText("✎  EDIT");
-        edit.setTextColor(Color.parseColor("#FFFC5C"));
-        edit.setTextSize(15);
-        edit.setTypeface(null,android.graphics.Typeface.BOLD);
-        edit.setGravity(android.view.Gravity.CENTER);
-        edit.setPadding(18,12,18,12);
-        edit.setBackgroundResource(R.drawable.glow_dark_button);
-        edit.setOnClickListener(v -> editAction.run());
+        row.setPadding(0,8,0,4);
 
         TextView copy = new TextView(this);
         copy.setText("⧉  COPY");
-        copy.setTextColor(Color.parseColor("#FFFC5C"));
+        copy.setTextColor(Color.rgb(255,193,7));
         copy.setTextSize(15);
         copy.setTypeface(null,android.graphics.Typeface.BOLD);
         copy.setGravity(android.view.Gravity.CENTER);
         copy.setPadding(18,12,18,12);
-        copy.setBackgroundResource(R.drawable.glow_dark_button);
+
         copy.setOnClickListener(v -> copyAction.run());
 
+        TextView edit = new TextView(this);
+        edit.setText("✎  EDIT");
+        edit.setTextColor(Color.rgb(255,193,7));
+        edit.setTextSize(15);
+        edit.setTypeface(null,android.graphics.Typeface.BOLD);
+        edit.setGravity(android.view.Gravity.CENTER);
+        edit.setPadding(18,12,18,12);
+
+        edit.setOnClickListener(v -> editAction.run());
+
         row.addView(
-            edit,
+            copy,
             new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1156,7 +1020,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         row.addView(
-            copy,
+            edit,
             new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1235,8 +1099,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        info.setVisibility(View.GONE);
-
         ViewGroup parent =
             (ViewGroup)info.getParent();
 
@@ -1248,28 +1110,25 @@ public class MainActivity extends AppCompatActivity {
         );
 
         wrapper.setTag("feature1Actions");
-        wrapper.setPadding(4,4,4,4);
 
         TextView gtinLabel =
             new TextView(this);
 
-        gtinLabel.setText(
-            "GTIN/pbarcode_canonical :  " + p.gtin
-        );
+        gtinLabel.setText("SCANNED GTIN");
         gtinLabel.setTextColor(
-            Color.WHITE
+            Color.rgb(255,193,7)
         );
-        gtinLabel.setTextSize(16);
+        gtinLabel.setTextSize(14);
         gtinLabel.setTypeface(
             null,
             android.graphics.Typeface.BOLD
         );
-        gtinLabel.setPadding(0,4,0,0);
 
         wrapper.addView(gtinLabel);
 
         wrapper.addView(
             createActionRow(
+                () -> copyValue(p.gtin),
                 () -> editValueDialog(
                     "EDIT GTIN",
                     p.gtin,
@@ -1277,31 +1136,31 @@ public class MainActivity extends AppCompatActivity {
                         if(newValue.isEmpty()) return;
                         find(newValue);
                     }
-                ),
-                () -> copyValue(p.gtin)
+                )
             )
         );
 
         TextView wmsLabel =
             new TextView(this);
 
-        wmsLabel.setText(
-            "WMS barcode :  " + p.wms
-        );
+        wmsLabel.setText("WMS BARCODE");
         wmsLabel.setTextColor(
-            Color.WHITE
+            Color.rgb(255,193,7)
         );
-        wmsLabel.setTextSize(16);
+        wmsLabel.setTextSize(14);
         wmsLabel.setTypeface(
             null,
             android.graphics.Typeface.BOLD
         );
-        wmsLabel.setPadding(0,14,0,0);
+        wmsLabel.setPadding(0,12,0,0);
 
         wrapper.addView(wmsLabel);
 
         wrapper.addView(
             createActionRow(
+                () -> copyValue(
+                    last == null ? p.wms : last.wms
+                ),
                 () -> editValueDialog(
                     "EDIT WMS",
                     last == null ? p.wms : last.wms,
@@ -1319,7 +1178,16 @@ public class MainActivity extends AppCompatActivity {
                             );
 
                             if(last != null){
-                                addFeature1Actions(last);
+                                info.setText(
+                                    "GTIN / pbarcode_canonical:  "+
+                                    last.gtin+
+                                    "\nWMS barcode:  "+
+                                    last.wms+
+                                    "\nPartner ID:  "+
+                                    last.partner+
+                                    "\nStatus:  "+
+                                    last.status
+                                );
                             }
 
                             status.setText(
@@ -1333,30 +1201,9 @@ public class MainActivity extends AppCompatActivity {
                             );
                         }
                     }
-                ),
-                () -> copyValue(
-                    last == null ? p.wms : last.wms
                 )
             )
         );
-
-        TextView partnerLabel =
-            new TextView(this);
-
-        partnerLabel.setText(
-            "Partner ID :  " + p.partner
-        );
-        partnerLabel.setTextColor(
-            Color.WHITE
-        );
-        partnerLabel.setTextSize(16);
-        partnerLabel.setTypeface(
-            null,
-            android.graphics.Typeface.BOLD
-        );
-        partnerLabel.setPadding(0,14,0,6);
-
-        wrapper.addView(partnerLabel);
 
         int index = parent.indexOfChild(info);
 
@@ -1367,15 +1214,6 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-        );
-    }
-
-    void updateResultInformation(Product p){
-
-        info.setText(
-            "GTIN/pbarcode_canonical :  " + p.gtin +
-            "\nWMS barcode :  " + p.wms +
-            "\nPartner ID :  " + p.partner
         );
     }
 
