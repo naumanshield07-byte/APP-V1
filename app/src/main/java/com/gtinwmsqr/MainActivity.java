@@ -45,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
     java.util.LinkedHashSet<String> bufferedGtins = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedWms = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedLocations = new java.util.LinkedHashSet<>();
+
+    /* Multi-frame voting: value -> times seen in last N frames */
+    java.util.HashMap<String,Integer> voteGtins = new java.util.HashMap<>();
+    java.util.HashMap<String,Integer> voteWms = new java.util.HashMap<>();
+    java.util.HashMap<String,Integer> voteLocations = new java.util.HashMap<>();
+    static final int VOTE_THRESHOLD = 2;
     volatile long lastOcrUpdate = 0L;
     String manualButtonOriginalText = null;
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
@@ -101,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         bufferedGtins.clear();
         bufferedWms.clear();
         bufferedLocations.clear();
+        resetVotes();
         lastOcrUpdate=0L;
 
         if(textQrMode){
@@ -447,6 +454,23 @@ public class MainActivity extends AppCompatActivity {
         showOcrResults(g, w, l);
     }
 
+    /*
+     * Feed a candidate through the voting system. Returns true if
+     * the value has been seen enough times to be trusted.
+     */
+    boolean vote(java.util.HashMap<String,Integer> map, String value){
+        Integer c = map.get(value);
+        int next = (c == null ? 1 : c + 1);
+        map.put(value, next);
+        return next >= VOTE_THRESHOLD;
+    }
+
+    void resetVotes(){
+        voteGtins.clear();
+        voteWms.clear();
+        voteLocations.clear();
+    }
+
     void startOcrAnalyzer(ImageAnalysis analysis){
         analysis.setAnalyzer(
             Executors.newSingleThreadExecutor(),
@@ -552,9 +576,21 @@ public class MainActivity extends AppCompatActivity {
                             ocrDetected = true;
 
                             runOnUiThread(() -> {
-                                bufferedGtins.addAll(gtins);
-                                bufferedWms.addAll(wmsCodes);
-                                bufferedLocations.addAll(locations);
+                                for(String g : gtins){
+                                    if(vote(voteGtins, g)){
+                                        bufferedGtins.add(g);
+                                    }
+                                }
+                                for(String w : wmsCodes){
+                                    if(vote(voteWms, w)){
+                                        bufferedWms.add(w);
+                                    }
+                                }
+                                for(String l : locations){
+                                    if(vote(voteLocations, l)){
+                                        bufferedLocations.add(l);
+                                    }
+                                }
 
                                 int total = bufferedGtins.size()
                                     + bufferedWms.size()
