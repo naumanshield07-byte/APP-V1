@@ -34,7 +34,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import org.json.JSONArray; import org.json.JSONObject;
-import java.io.*; import java.util.*; import java.util.concurrent.*;
+import java.io.*; import java.util.*; import java.util.concurrent.*; import java.time.LocalDate; import java.time.format.DateTimeFormatter; import java.time.temporal.ChronoUnit;
 
 public class MainActivity extends AppCompatActivity {
     static final int REQ=1001;
@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout ocrQrContainer;
     LinearLayout slKlResultCard, qrCard;
     TextView slKlGtinValue, slKlPartnerValue, slKlShelfLifeValue, slKlKeepLifeValue;
+    TextView slKlProductionDateValue, slKlShelfLifeDateValue, slKlKeepLifeDateValue;
+    TextView slKlRemainingValue, slKlStatusValue;
     java.util.LinkedHashSet<String> bufferedGtins = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedWms = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedLocations = new java.util.LinkedHashSet<>();
@@ -152,6 +154,11 @@ public class MainActivity extends AppCompatActivity {
         slKlPartnerValue=findViewById(R.id.slKlPartnerValue);
         slKlShelfLifeValue=findViewById(R.id.slKlShelfLifeValue);
         slKlKeepLifeValue=findViewById(R.id.slKlKeepLifeValue);
+        slKlProductionDateValue=findViewById(R.id.slKlProductionDateValue);
+        slKlShelfLifeDateValue=findViewById(R.id.slKlShelfLifeDateValue);
+        slKlKeepLifeDateValue=findViewById(R.id.slKlKeepLifeDateValue);
+        slKlRemainingValue=findViewById(R.id.slKlRemainingValue);
+        slKlStatusValue=findViewById(R.id.slKlStatusValue);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
@@ -1632,6 +1639,93 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void stopCamera(){try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
+    void showProductionDatePicker(SlKlProduct p){
+        java.util.Calendar today = java.util.Calendar.getInstance();
+
+        android.app.DatePickerDialog dialog =
+            new android.app.DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    try{
+                        LocalDate productionDate =
+                            LocalDate.of(year, month + 1, dayOfMonth);
+
+                        DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                        slKlProductionDateValue.setText(
+                            productionDate.format(formatter)
+                        );
+
+                        if(!p.shelfLife.isEmpty()){
+                            long shelfDays = Long.parseLong(p.shelfLife);
+                            LocalDate shelfLifeDate =
+                                productionDate.plusDays(shelfDays);
+
+                            slKlShelfLifeDateValue.setText(
+                                shelfLifeDate.format(formatter)
+                            );
+                        }else{
+                            slKlShelfLifeDateValue.setText("—");
+                        }
+
+                        if(!p.keepLife.isEmpty()){
+                            long keepDays = Long.parseLong(p.keepLife);
+                            LocalDate keepLifeDate =
+                                productionDate.plusDays(keepDays);
+
+                            slKlKeepLifeDateValue.setText(
+                                keepLifeDate.format(formatter)
+                            );
+
+                            LocalDate todayDate = LocalDate.now();
+
+                            long remainingDays =
+                                ChronoUnit.DAYS.between(
+                                    todayDate,
+                                    keepLifeDate
+                                );
+
+                            if(remainingDays <= 0){
+                                slKlRemainingValue.setText("0 days");
+                                slKlStatusValue.setText("EXPIRED");
+                            }else{
+                                slKlRemainingValue.setText(
+                                    remainingDays + " days"
+                                );
+
+                                if(remainingDays <= 3){
+                                    slKlStatusValue.setText("NEAR EXPIRY");
+                                }else{
+                                    slKlStatusValue.setText("GOOD");
+                                }
+                            }
+                        }else{
+                            slKlKeepLifeDateValue.setText("—");
+                            slKlRemainingValue.setText("—");
+                            slKlStatusValue.setText("—");
+                        }
+
+                    }catch(Exception e){
+                        slKlProductionDateValue.setText("Invalid date");
+                        slKlShelfLifeDateValue.setText("—");
+                        slKlKeepLifeDateValue.setText("—");
+                        slKlRemainingValue.setText("—");
+                        slKlStatusValue.setText("—");
+                    }
+                },
+                today.get(java.util.Calendar.YEAR),
+                today.get(java.util.Calendar.MONTH),
+                today.get(java.util.Calendar.DAY_OF_MONTH)
+            );
+
+        dialog.setTitle("SELECT PRODUCTION DATE");
+        dialog.setOnCancelListener(d ->
+            status.setText("Production date not selected.")
+        );
+        dialog.show();
+    }
+
     void findSlKl(String v){
         String key=(v==null?"":v).trim();
         input.setText(key);
@@ -1688,6 +1782,8 @@ public class MainActivity extends AppCompatActivity {
 
         slKlResultCard.setVisibility(View.VISIBLE);
         qrCard.setVisibility(View.GONE);
+
+        showProductionDatePicker(p);
 
         findViewById(R.id.saveButton).setVisibility(View.GONE);
         findViewById(R.id.printButton).setVisibility(View.GONE);

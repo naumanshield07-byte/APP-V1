@@ -452,6 +452,171 @@
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
 
+                <View
+                    android:background="#333333"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="PRODUCTION DATE"
+                        android:textColor="#FCFC3D"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/slKlProductionDateValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:gravity="end"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.7"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <View
+                    android:background="#333333"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="SHELF LIFE DATE"
+                        android:textColor="#FCFC3D"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/slKlShelfLifeDateValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:gravity="end"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.7"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <View
+                    android:background="#333333"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="KEEP LIFE DATE"
+                        android:textColor="#FCFC3D"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/slKlKeepLifeDateValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:gravity="end"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.7"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <View
+                    android:background="#333333"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="REMAINING KEEP LIFE"
+                        android:textColor="#FCFC3D"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/slKlRemainingValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:gravity="end"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.7"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <View
+                    android:background="#333333"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="STATUS"
+                        android:textColor="#FCFC3D"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/slKlStatusValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:gravity="end"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.7"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- QR CARD -->
