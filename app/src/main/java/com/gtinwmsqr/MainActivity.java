@@ -41,8 +41,26 @@ public class MainActivity extends AppCompatActivity {
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
-    ImageView captureShutter; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    ImageView captureShutter; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean slKlMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+
+    static class SlKlProduct {
+        String gtin;
+        String partner;
+        String shelfLife;
+        String keepLife;
+
+        SlKlProduct(String gtin, String partner, String shelfLife, String keepLife){
+            this.gtin = gtin;
+            this.partner = partner;
+            this.shelfLife = shelfLife;
+            this.keepLife = keepLife;
+        }
+    }
+
+    Map<String,SlKlProduct> slKlProducts = new HashMap<>();
     LinearLayout ocrQrContainer;
+    LinearLayout slKlResultCard, qrCard;
+    TextView slKlGtinValue, slKlPartnerValue, slKlShelfLifeValue, slKlKeepLifeValue;
     java.util.LinkedHashSet<String> bufferedGtins = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedWms = new java.util.LinkedHashSet<>();
     java.util.LinkedHashSet<String> bufferedLocations = new java.util.LinkedHashSet<>();
@@ -66,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     ScrollView historyScroll;
 
     static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
-    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
+    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();loadSlKlCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
         textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
         showModeScreen();}
@@ -128,6 +146,12 @@ public class MainActivity extends AppCompatActivity {
         applyStatusBarInset();
         preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo); resultTitle=findViewById(R.id.resultTitle);
         ocrQrContainer=findViewById(R.id.ocrQrContainer);
+        slKlResultCard=findViewById(R.id.slKlResultCard);
+        qrCard=findViewById(R.id.qrCard);
+        slKlGtinValue=findViewById(R.id.slKlGtinValue);
+        slKlPartnerValue=findViewById(R.id.slKlPartnerValue);
+        slKlShelfLifeValue=findViewById(R.id.slKlShelfLifeValue);
+        slKlKeepLifeValue=findViewById(R.id.slKlKeepLifeValue);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
@@ -135,17 +159,33 @@ public class MainActivity extends AppCompatActivity {
         modeSelection=findViewById(R.id.modeSelection);
         wmsModeButton=findViewById(R.id.wmsModeButton);
         textQrModeButton=findViewById(R.id.textQrModeButton);
+        slKlModeButton=findViewById(R.id.slKlModeButton);
         changeModeButton=findViewById(R.id.changeModeButton);
         importCatalogButton=findViewById(R.id.importCatalogButton);
 
         changeModeButton.setOnClickListener(v->showModeScreen());
         importCatalogButton.setOnClickListener(v->openCatalogPicker());
 
-        wmsModeButton.setOnClickListener(v->{textQrMode=false;openScannerMode();});
-        textQrModeButton.setOnClickListener(v->{textQrMode=true;openScannerMode();});
+        wmsModeButton.setOnClickListener(v->{textQrMode=false;slKlMode=false;openScannerMode();});
+        textQrModeButton.setOnClickListener(v->{textQrMode=true;slKlMode=false;openScannerMode();});
+        slKlModeButton.setOnClickListener(v->{textQrMode=false;slKlMode=true;openScannerMode();});
 
-        findViewById(R.id.findButton).setOnClickListener(v->find(input.getText().toString()));
-        findViewById(R.id.againButton).setOnClickListener(v->{resultScroll.setVisibility(View.GONE);cameraCard.setVisibility(View.VISIBLE);manualPanel.setVisibility(View.GONE);notFound.setVisibility(View.GONE);startCamera();});
+        findViewById(R.id.findButton).setOnClickListener(v->{
+            if(slKlMode){
+                findSlKl(input.getText().toString());
+            }else{
+                find(input.getText().toString());
+            }
+        });
+        findViewById(R.id.againButton).setOnClickListener(v->{
+            resultScroll.setVisibility(View.GONE);
+            cameraCard.setVisibility(View.VISIBLE);
+            manualPanel.setVisibility(View.GONE);
+            notFound.setVisibility(View.GONE);
+            slKlResultCard.setVisibility(View.GONE);
+            qrCard.setVisibility(View.VISIBLE);
+            startCamera();
+        });
         findViewById(R.id.saveButton).setOnClickListener(v->saveQr()); findViewById(R.id.printButton).setOnClickListener(v->printQr());
         manualButton.setOnClickListener(v->{
             if(textQrMode){
@@ -175,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
         manualPanel.setVisibility(View.GONE);
         resultScroll.setVisibility(View.GONE);
         notFound.setVisibility(View.GONE);
+        slKlResultCard.setVisibility(View.GONE);
+        qrCard.setVisibility(View.VISIBLE);
         status.setText("Select scanning mode");
     }
 
@@ -211,11 +253,74 @@ public class MainActivity extends AppCompatActivity {
         qr.setVisibility(View.VISIBLE);
         ocrQrContainer.setVisibility(View.GONE);
         ocrQrContainer.removeAllViews();
+        slKlResultCard.setVisibility(View.GONE);
+        qrCard.setVisibility(View.VISIBLE);
 
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},REQ);
         } else {
             startCamera();
+        }
+    }
+
+    void loadSlKlCatalog(){
+        slKlProducts.clear();
+
+        try(InputStream is = getAssets().open("sl_kl.csv");
+            BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                    is,
+                    java.nio.charset.StandardCharsets.UTF_8
+                )
+            )){
+
+            String line = br.readLine();
+
+            if(line == null){
+                throw new Exception("SL/KL file is empty");
+            }
+
+            int count = 0;
+
+            while((line = br.readLine()) != null){
+
+                if(line.trim().isEmpty()) continue;
+
+                String[] parts = line.split(",", -1);
+
+                if(parts.length < 4) continue;
+
+                String gtin = parts[0].trim();
+                String partner = parts[1].trim();
+                String shelfLife = parts[2].trim();
+                String keepLife = parts[3].trim();
+
+                if(gtin.isEmpty()) continue;
+
+                slKlProducts.put(
+                    gtin,
+                    new SlKlProduct(
+                        gtin,
+                        partner,
+                        shelfLife,
+                        keepLife
+                    )
+                );
+
+                count++;
+            }
+
+            status.setText(
+                "SL/KL catalog loaded: "
+                + count
+                + " products"
+            );
+
+        }catch(Exception e){
+            status.setText(
+                "SL/KL catalog load error: "
+                + e.getMessage()
+            );
         }
     }
 
@@ -479,7 +584,13 @@ public class MainActivity extends AppCompatActivity {
                                         String v=x.getRawValue();
 
                                         if(v!=null&&!v.isEmpty()){
-                                            runOnUiThread(()->find(v));
+                                            runOnUiThread(()->{
+                                                if(slKlMode){
+                                                    findSlKl(v);
+                                                }else{
+                                                    find(v);
+                                                }
+                                            });
                                             break;
                                         }
                                     }
@@ -501,7 +612,9 @@ public class MainActivity extends AppCompatActivity {
                 status.setText(
                     textQrMode
                         ? "OCR camera ready — point at the GTIN text."
-                        : "Camera ready — scan the product GTIN."
+                        : slKlMode
+                            ? "Camera ready — scan the product GTIN for SL/KL."
+                            : "Camera ready — scan the product GTIN."
                 );
 
             }catch(Exception e){
@@ -1519,6 +1632,69 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void stopCamera(){try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
+    void findSlKl(String v){
+        String key=(v==null?"":v).trim();
+        input.setText(key);
+        notFound.setVisibility(View.GONE);
+
+        if(key.isEmpty()) return;
+
+        SlKlProduct p=slKlProducts.get(key);
+
+        if(p==null){
+            stopCamera();
+            cameraCard.setVisibility(View.GONE);
+            manualPanel.setVisibility(View.GONE);
+            resultScroll.setVisibility(View.VISIBLE);
+
+            resultTitle.setText("PRODUCT NOT FOUND");
+            info.setVisibility(View.GONE);
+
+            slKlResultCard.setVisibility(View.GONE);
+            qrCard.setVisibility(View.GONE);
+
+            notFound.setText(
+                "No matching GTIN was found in the SL/KL catalog.\n\n" +
+                "GTIN: "+key
+            );
+            notFound.setVisibility(View.VISIBLE);
+
+            resultScroll.post(()->resultScroll.requestFocus());
+            return;
+        }
+
+        saveHistoryEntry("GTIN", p.gtin, "sl_kl");
+
+        stopCamera();
+        cameraCard.setVisibility(View.GONE);
+        manualPanel.setVisibility(View.GONE);
+        resultScroll.setVisibility(View.VISIBLE);
+
+        resultTitle.setText("PRODUCT FOUND");
+        info.setVisibility(View.GONE);
+        notFound.setVisibility(View.GONE);
+
+        slKlGtinValue.setText(p.gtin);
+        slKlPartnerValue.setText(p.partner);
+
+        // Blank source values remain blank; no value is guessed.
+        slKlShelfLifeValue.setText(
+            p.shelfLife.isEmpty() ? "—" : p.shelfLife
+        );
+
+        slKlKeepLifeValue.setText(
+            p.keepLife.isEmpty() ? "—" : p.keepLife
+        );
+
+        slKlResultCard.setVisibility(View.VISIBLE);
+        qrCard.setVisibility(View.GONE);
+
+        saveButton.setVisibility(View.GONE);
+        printButton.setVisibility(View.GONE);
+
+        resultScroll.post(()->resultScroll.requestFocus());
+    }
+
     void find(String v){
         String key=(v==null?"":v).trim();
         input.setText(key);
@@ -1544,6 +1720,12 @@ public class MainActivity extends AppCompatActivity {
         cameraCard.setVisibility(View.GONE);
         manualPanel.setVisibility(View.GONE);
         resultScroll.setVisibility(View.VISIBLE);
+
+        resultTitle.setText("PRODUCT FOUND");
+        slKlResultCard.setVisibility(View.GONE);
+        qrCard.setVisibility(View.VISIBLE);
+        saveButton.setVisibility(View.VISIBLE);
+        printButton.setVisibility(View.VISIBLE);
 
         info.setText("");
         info.setVisibility(View.GONE);
