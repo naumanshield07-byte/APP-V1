@@ -34,137 +34,54 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <GridLayout
-            android:columnCount="2"
-            android:layout_marginTop="40dp"
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#080808"
+            android:padding="0dp"
+            android:layout_marginTop="55dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
+            <Button
                 android:id="@+id/wmsModeButton"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="@drawable/glow_button_red"
-                android:layout_margin="6dp"
-                android:paddingTop="22dp"
-                android:paddingBottom="22dp"
-                android:layout_columnWeight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content">
+                android:text="SCANNER"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="17sp"
+                android:background="@drawable/glow_button"
+                android:minHeight="64dp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"/>
 
-                <ImageView
-                    android:src="@drawable/ic_menu_scanner"
-                    android:contentDescription="SCANNER"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"/>
-
-                <TextView
-                    android:text="SCANNER"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.04"
-                    android:layout_marginTop="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
+            <Button
                 android:id="@+id/textQrModeButton"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="@drawable/glow_button_red"
-                android:layout_margin="6dp"
-                android:paddingTop="22dp"
-                android:paddingBottom="22dp"
-                android:layout_columnWeight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content">
+                android:text="TEXT SCANNER"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="17sp"
+                android:background="@drawable/glow_button"
+                android:minHeight="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"/>
 
-                <ImageView
-                    android:src="@drawable/ic_menu_text"
-                    android:contentDescription="TEXT SCANNER"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"/>
-
-                <TextView
-                    android:text="TEXT SCANNER"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.04"
-                    android:layout_marginTop="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
+            <Button
                 android:id="@+id/slKlModeButton"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="@drawable/glow_button_red"
-                android:layout_margin="6dp"
-                android:paddingTop="22dp"
-                android:paddingBottom="22dp"
-                android:layout_columnWeight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content">
+                android:text="SL = KL"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="17sp"
+                android:background="@drawable/glow_button"
+                android:minHeight="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"/>
 
-                <ImageView
-                    android:src="@drawable/ic_menu_slkl"
-                    android:contentDescription="SL = KL"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"/>
-
-                <TextView
-                    android:text="SL = KL"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.04"
-                    android:layout_marginTop="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/historyButton"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="@drawable/glow_button_red"
-                android:layout_margin="6dp"
-                android:paddingTop="22dp"
-                android:paddingBottom="22dp"
-                android:layout_columnWeight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:src="@drawable/ic_menu_history"
-                    android:contentDescription="HISTORY"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"/>
-
-                <TextView
-                    android:text="HISTORY"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.04"
-                    android:layout_marginTop="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-        </GridLayout>
+        </LinearLayout>
 
         <TextView
             android:text="SELECT SCANNING OPTION"
@@ -184,7 +101,7 @@
             android:textStyle="bold"
             android:textColor="#000000"
             android:textSize="15sp"
-            android:background="@drawable/glow_button_red"
+            android:background="@drawable/glow_button"
             android:minHeight="52dp"
             android:layout_marginTop="18dp"
             android:layout_width="match_parent"
@@ -258,11 +175,11 @@
 
         <Button
             android:id="@+id/changeModeButton"
-            android:text="← MENU"
+            android:text="← Change Mode"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="#000000"
-            android:background="@drawable/glow_button_red"
+            android:background="@drawable/glow_button"
             android:minHeight="48dp"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
@@ -304,7 +221,7 @@
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:background="@drawable/glow_button_red"
+                android:background="@drawable/glow_button"
                 android:minHeight="52dp"
                 android:minWidth="220dp"
                 android:paddingStart="18dp"
@@ -345,7 +262,7 @@
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="#000000"
-            android:background="@drawable/glow_button_red"
+            android:background="@drawable/glow_button"
             android:minHeight="52dp"
             android:layout_marginStart="10dp"
             android:layout_width="92dp"
@@ -753,7 +670,7 @@
                     android:textAllCaps="false"
                     android:textStyle="bold"
                     android:textColor="#000000"
-                    android:background="@drawable/glow_button_red"
+                    android:background="@drawable/glow_button"
                     android:minHeight="56dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
@@ -765,7 +682,7 @@
                     android:textAllCaps="false"
                     android:textStyle="bold"
                     android:textColor="#000000"
-                    android:background="@drawable/glow_button_red"
+                    android:background="@drawable/glow_button"
                     android:minHeight="56dp"
                     android:layout_marginStart="10dp"
                     android:layout_weight="1"
@@ -780,7 +697,7 @@
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:background="@drawable/glow_button_red"
+                android:background="@drawable/glow_button"
                 android:minHeight="56dp"
                 android:layout_marginTop="12dp"
                 android:layout_width="match_parent"

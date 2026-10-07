@@ -1,33 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Toolbox handle -->
-    <path
-        android:strokeColor="#FCFC3D"
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:strokeColor="#FCFC3D" android:strokeWidth="5"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 44,52 L 44,42 Q 44,34 52,34 L 56,34 Q 64,34 64,42 L 64,52"/>
-
-    <!-- Toolbox body (rounded) -->
-    <path
-        android:strokeColor="#FCFC3D"
-        android:strokeWidth="5"
+        android:pathData="M54,14 L88,34 L88,74 L54,94 L20,74 L20,34 Z"/>
+    <path android:strokeColor="#FCFC3D" android:strokeWidth="4"
         android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:fillColor="#00000000"
-        android:pathData="M 26,54 L 82,54 Q 88,54 88,60 L 88,82 Q 88,88 82,88 L 26,88 Q 20,88 20,82 L 20,60 Q 20,54 26,54 Z"/>
-
-    <!-- Barcode lines inside toolbox -->
-    <path
-        android:strokeColor="#FCFC3D"
-        android:strokeWidth="4"
-        android:strokeLineCap="butt"
-        android:fillColor="#00000000"
-        android:pathData="M 34,66 L 34,80 M 44,66 L 44,80 M 54,66 L 54,80 M 64,66 L 64,80 M 74,66 L 74,80"/>
+        android:pathData="M36,44 L36,64 M46,44 L46,64 M54,44 L54,64 M62,44 L62,64 M72,44 L72,64"/>
 </vector>

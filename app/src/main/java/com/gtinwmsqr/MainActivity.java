@@ -205,8 +205,11 @@ public class MainActivity extends AppCompatActivity {
         });
         flashButton.setOnClickListener(v->toggleTorch());
 
-        addHistoryButton();
+        // addHistoryButton();  // 4th cell now lives in the layout
         loadHistory();
+        try{ View hb = findViewById(R.id.historyButton);
+             if(hb != null) hb.setOnClickListener(v -> openHistory());
+        }catch(Exception ignored){}
 
         resultTitle.setTextColor(Color.parseColor("#FCFC3D"));
         info.setTextColor(Color.parseColor("#FCFC3D"));
