@@ -17,7 +17,7 @@ public class ScanFrameView extends View {
         frame.setStrokeWidth(dp(4));
         frame.setStrokeCap(Paint.Cap.SQUARE);
         overlay.setStyle(Paint.Style.FILL);
-        overlay.setColor(0x99333333); /* 60% opacity dark grey */
+        overlay.setColor(0x73333333); /* 45% opacity dark grey */
     }
 
     private float dp(float v){
