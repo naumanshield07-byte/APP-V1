@@ -158,7 +158,13 @@ public class MainActivity extends AppCompatActivity {
         slKlShelfLifeDateValue=findViewById(R.id.slKlShelfLifeDateValue);
         slKlKeepLifeDateValue=findViewById(R.id.slKlKeepLifeDateValue);
         slKlRemainingValue=findViewById(R.id.slKlRemainingValue);
+        slKlRemainingValue.setTextColor(Color.parseColor("#FCFC3D"));
+        slKlRemainingValue.setTextSize(18);
+        slKlRemainingValue.setTypeface(null, android.graphics.Typeface.BOLD);
         slKlStatusValue=findViewById(R.id.slKlStatusValue);
+        slKlStatusValue.setTextSize(20);
+        slKlStatusValue.setTypeface(null, android.graphics.Typeface.BOLD);
+        slKlStatusValue.setLetterSpacing(0.08f);
         notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
@@ -1659,6 +1665,7 @@ public class MainActivity extends AppCompatActivity {
                         slKlProductionDateValue.setText(
                             productionDate.format(formatter)
                         );
+                        slKlProductionDateValue.setTextColor(Color.parseColor("#FCFC3D"));
 
                         if(!p.shelfLife.isEmpty()){
                             long shelfDays = Long.parseLong(p.shelfLife);
@@ -1668,6 +1675,7 @@ public class MainActivity extends AppCompatActivity {
                             slKlShelfLifeDateValue.setText(
                                 shelfLifeDate.format(formatter)
                             );
+                            slKlShelfLifeDateValue.setTextColor(Color.parseColor("#FCFC3D"));
                         }else{
                             slKlShelfLifeDateValue.setText("—");
                         }
@@ -1680,6 +1688,7 @@ public class MainActivity extends AppCompatActivity {
                             slKlKeepLifeDateValue.setText(
                                 keepLifeDate.format(formatter)
                             );
+                            slKlKeepLifeDateValue.setTextColor(Color.parseColor("#FCFC3D"));
 
                             LocalDate todayDate = LocalDate.now();
 
@@ -1692,6 +1701,7 @@ public class MainActivity extends AppCompatActivity {
                             if(remainingDays <= 0){
                                 slKlRemainingValue.setText("0 days");
                                 slKlStatusValue.setText("EXPIRED");
+                                slKlStatusValue.setTextColor(Color.parseColor("#FF3333"));
                             }else{
                                 slKlRemainingValue.setText(
                                     remainingDays + " days"
@@ -1699,14 +1709,17 @@ public class MainActivity extends AppCompatActivity {
 
                                 if(remainingDays <= 3){
                                     slKlStatusValue.setText("NEAR EXPIRY");
+                                    slKlStatusValue.setTextColor(Color.parseColor("#FFA500"));
                                 }else{
                                     slKlStatusValue.setText("GOOD");
+                                    slKlStatusValue.setTextColor(Color.parseColor("#22CC44"));
                                 }
                             }
                         }else{
                             slKlKeepLifeDateValue.setText("—");
                             slKlRemainingValue.setText("—");
                             slKlStatusValue.setText("—");
+                            slKlStatusValue.setTextColor(Color.parseColor("#FCFC3D"));
                         }
 
                     }catch(Exception e){
