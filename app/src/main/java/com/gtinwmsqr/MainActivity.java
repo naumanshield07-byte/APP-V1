@@ -1689,8 +1689,8 @@ public class MainActivity extends AppCompatActivity {
         slKlResultCard.setVisibility(View.VISIBLE);
         qrCard.setVisibility(View.GONE);
 
-        saveButton.setVisibility(View.GONE);
-        printButton.setVisibility(View.GONE);
+        findViewById(R.id.saveButton).setVisibility(View.GONE);
+        findViewById(R.id.printButton).setVisibility(View.GONE);
 
         resultScroll.post(()->resultScroll.requestFocus());
     }
@@ -1724,8 +1724,8 @@ public class MainActivity extends AppCompatActivity {
         resultTitle.setText("PRODUCT FOUND");
         slKlResultCard.setVisibility(View.GONE);
         qrCard.setVisibility(View.VISIBLE);
-        saveButton.setVisibility(View.VISIBLE);
-        printButton.setVisibility(View.VISIBLE);
+        findViewById(R.id.saveButton).setVisibility(View.VISIBLE);
+        findViewById(R.id.printButton).setVisibility(View.VISIBLE);
 
         info.setText("");
         info.setVisibility(View.GONE);
