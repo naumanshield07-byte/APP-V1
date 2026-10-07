@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
-    ImageView captureShutter; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean slKlMode=false; BarcodeScanner scanner; Map<String,Product> products=new HashMap<>(); Product last;
+    ImageView captureShutter; Button manualButton; Button wmsModeButton; Button textQrModeButton; Button slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,Product> products=new HashMap<>(); Product last;
 
     static class SlKlProduct {
         String gtin;
@@ -571,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
                     startOcrAnalyzer(analysis);
                 }else{
                     analysis.setAnalyzer(
-                        Executors.newSingleThreadExecutor(),
+                        cameraExecutor,
                         image->{
                             InputImage ii=InputImage.fromMediaImage(
                                 image.getImage(),
@@ -928,7 +928,7 @@ public class MainActivity extends AppCompatActivity {
 
     void startOcrAnalyzer(ImageAnalysis analysis){
         analysis.setAnalyzer(
-            Executors.newSingleThreadExecutor(),
+            cameraExecutor,
             image -> {
 
                 InputImage imageInput = InputImage.fromMediaImage(
@@ -2101,6 +2101,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         showModeScreen();
+    }
+
+    @Override
+    protected void onDestroy(){
+        stopCamera();
+
+        try{
+            cameraExecutor.shutdownNow();
+        }catch(Exception ignored){}
+
+        try{
+            if(scanner!=null) scanner.close();
+        }catch(Exception ignored){}
+
+        try{
+            if(textRecognizer!=null) textRecognizer.close();
+        }catch(Exception ignored){}
+
+        super.onDestroy();
     }
 
     @Override public void onRequestPermissionsResult(int r,@NonNull String[] p,@NonNull int[] g){super.onRequestPermissionsResult(r,p,g);if(r==REQ&&g.length>0&&g[0]==PackageManager.PERMISSION_GRANTED)startCamera();else status.setText("Camera permission denied. You can still enter a GTIN manually.");}
