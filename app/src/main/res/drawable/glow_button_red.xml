@@ -12,7 +12,7 @@
             <corners android:radius="20dp"/>
         </shape>
     </item>
-    <item android:top="3dp" android:left="6dp" android:right="6dp" android:bottom="52%">
+    <item android:top="3dp" android:left="6dp" android:right="6dp" android:bottom="32dp">
         <shape android:shape="rectangle">
             <gradient
                 android:type="linear"
