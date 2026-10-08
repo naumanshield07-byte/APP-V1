@@ -681,7 +681,7 @@ public class MainActivity extends AppCompatActivity {
         backBtn.setText("\u2190");
         backBtn.setTextSize(22);
         backBtn.setTextColor(Color.BLACK);
-        backBtn.setBackgroundResource(R.drawable.glow_button);
+        backBtn.setBackgroundResource(R.drawable.glow_button_red);
         backBtn.setOnClickListener(v -> closeHistory());
         header.addView(backBtn);
 
@@ -700,7 +700,7 @@ public class MainActivity extends AppCompatActivity {
         clearBtn.setText("CLEAR");
         clearBtn.setTextSize(14);
         clearBtn.setTextColor(Color.BLACK);
-        clearBtn.setBackgroundResource(R.drawable.glow_button);
+        clearBtn.setBackgroundResource(R.drawable.glow_button_red);
         clearBtn.setOnClickListener(v -> clearHistory());
         header.addView(clearBtn);
 

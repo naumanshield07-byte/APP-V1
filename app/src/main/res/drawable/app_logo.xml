@@ -1,12 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp" android:height="108dp"
-    android:viewportWidth="108" android:viewportHeight="108">
-    <path android:strokeColor="#FCFC3D" android:strokeWidth="5"
-        android:strokeLineJoin="round"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Yellow rounded badge base -->
+    <path android:fillColor="#FCFC3D"
+        android:pathData="M38,26 L70,26 Q78,26 78,34 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 L30,34 Q30,26 38,26 Z"/>
+
+    <!-- Top gloss (lighter yellow, curved bottom edge) -->
+    <path android:fillColor="#FFFF85"
+        android:pathData="M38,26 L70,26 Q78,26 78,34 L78,48 Q54,54 30,48 L30,34 Q30,26 38,26 Z"/>
+
+    <!-- Glass shine (soft white dome) -->
+    <path android:fillColor="#55FFFFFF"
+        android:pathData="M40,29 L68,29 Q74,29 74,35 L74,45 Q54,49 34,45 L34,35 Q34,29 40,29 Z"/>
+
+    <!-- Bottom shade (darker yellow) -->
+    <path android:fillColor="#D4D427"
+        android:pathData="M30,68 Q54,74 78,68 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 Z"/>
+
+    <!-- Black barcode lines -->
+    <path android:fillColor="#000000"
+        android:pathData="M38,52 L41,52 L41,72 L38,72 Z"/>
+    <path android:fillColor="#000000"
+        android:pathData="M45,52 L48,52 L48,72 L45,72 Z"/>
+    <path android:fillColor="#000000"
+        android:pathData="M52,52 L56,52 L56,72 L52,72 Z"/>
+    <path android:fillColor="#000000"
+        android:pathData="M60,52 L63,52 L63,72 L60,72 Z"/>
+    <path android:fillColor="#000000"
+        android:pathData="M67,52 L70,52 L70,72 L67,72 Z"/>
+
+    <!-- Red rim -->
+    <path android:strokeColor="#FF0000"
+        android:strokeWidth="2"
         android:fillColor="#00000000"
-        android:pathData="M54,14 L88,34 L88,74 L54,94 L20,74 L20,34 Z"/>
-    <path android:strokeColor="#FCFC3D" android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:pathData="M36,44 L36,64 M46,44 L46,64 M54,44 L54,64 M62,44 L62,64 M72,44 L72,64"/>
+        android:pathData="M38,26 L70,26 Q78,26 78,34 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 L30,34 Q30,26 38,26 Z"/>
 </vector>
