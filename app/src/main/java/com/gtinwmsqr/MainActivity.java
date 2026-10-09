@@ -144,6 +144,19 @@ public class MainActivity extends AppCompatActivity {
         return (int)(24 * getResources().getDisplayMetrics().density);
     }
 
+    void applyRoundedClip(final View v, final float radiusDp){
+        final float r = radiusDp
+            * getResources().getDisplayMetrics().density;
+        v.setOutlineProvider(new android.view.ViewOutlineProvider(){
+            @Override public void getOutline(View view,
+                    android.graphics.Outline o){
+                o.setRoundRect(0, 0,
+                    view.getWidth(), view.getHeight(), r);
+            }
+        });
+        v.setClipToOutline(true);
+    }
+
     void bind(){
         applyStatusBarInset();
         preview=findViewById(R.id.preview); status=findViewById(R.id.statusText); info=findViewById(R.id.productInfo); resultTitle=findViewById(R.id.resultTitle);
@@ -165,7 +178,8 @@ public class MainActivity extends AppCompatActivity {
         slKlStatusValue.setTextSize(20);
         slKlStatusValue.setTypeface(null, android.graphics.Typeface.BOLD);
         slKlStatusValue.setLetterSpacing(0.08f);
-        notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
+        notFound=findViewById(R.id.notFoundText);
+        applyRoundedClip(qr, 20f); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
         manualButtonOriginalText=manualButton.getText().toString();
@@ -1526,7 +1540,8 @@ public class MainActivity extends AppCompatActivity {
 
         image.setLayoutParams(imgParams);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        image.setBackgroundColor(Color.WHITE);
+        image.setBackgroundResource(R.drawable.qr_rounded_bg);
+        applyRoundedClip(image, 20f);
 
         try{
             image.setImageBitmap(makeQr(value,1200));
@@ -1905,7 +1920,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView share = new TextView(this);
         share.setText("⤴  SHARE");
-        share.setTextColor(Color.parseColor("#FFFC5C"));
+        share.setTextColor(Color.WHITE);
         share.setTextSize(15);
         share.setTypeface(null,android.graphics.Typeface.BOLD);
         share.setGravity(android.view.Gravity.CENTER);
@@ -2014,7 +2029,7 @@ public class MainActivity extends AppCompatActivity {
         gtinLabel.setText(
             "GTIN/pbarcode_canonical :  " + p.gtin
         );
-        gtinLabel.setTextColor(Color.parseColor("#A855F7"));
+        gtinLabel.setTextColor(Color.WHITE);
         gtinLabel.setTextSize(16);
         gtinLabel.setTypeface(
             null,
@@ -2045,7 +2060,7 @@ public class MainActivity extends AppCompatActivity {
         wmsLabel.setText(
             "WMS barcode :  " + p.wms
         );
-        wmsLabel.setTextColor(Color.parseColor("#A855F7"));
+        wmsLabel.setTextColor(Color.WHITE);
         wmsLabel.setTextSize(16);
         wmsLabel.setTypeface(
             null,
@@ -2105,7 +2120,7 @@ public class MainActivity extends AppCompatActivity {
         partnerLabel.setText(
             "Partner ID :  " + p.partner
         );
-        partnerLabel.setTextColor(Color.parseColor("#A855F7"));
+        partnerLabel.setTextColor(Color.WHITE);
         partnerLabel.setTextSize(16);
         partnerLabel.setTypeface(
             null,

@@ -10,7 +10,7 @@
         android:id="@+id/modeSelection"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#111318"
+        android:background="@drawable/cinematic_bg"
         android:padding="24dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -46,7 +46,7 @@
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/menu_card"
+                android:background="@drawable/menu_card_ripple"
                 android:layout_margin="6dp"
                 android:paddingTop="22dp"
                 android:paddingBottom="22dp"
@@ -77,7 +77,7 @@
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/menu_card"
+                android:background="@drawable/menu_card_ripple"
                 android:layout_margin="6dp"
                 android:paddingTop="22dp"
                 android:paddingBottom="22dp"
@@ -108,7 +108,7 @@
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/menu_card"
+                android:background="@drawable/menu_card_ripple"
                 android:layout_margin="6dp"
                 android:paddingTop="22dp"
                 android:paddingBottom="22dp"
@@ -139,7 +139,7 @@
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/menu_card"
+                android:background="@drawable/menu_card_ripple"
                 android:layout_margin="6dp"
                 android:paddingTop="22dp"
                 android:paddingBottom="22dp"
@@ -168,7 +168,7 @@
 
         <TextView
             android:text="SELECT SCANNING OPTION"
-            android:textColor="#A855F7"
+            android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
@@ -211,7 +211,7 @@
 
             <TextView
                 android:text="TOOLS"
-                android:textColor="#A855F7"
+                android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
@@ -219,7 +219,7 @@
 
             <TextView
                 android:text="MULTI-TOOL"
-                android:textColor="#A855F7"
+                android:textColor="#FFFFFF"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.12"
@@ -275,7 +275,7 @@
         <TextView
             android:id="@+id/cameraHint"
             android:text="SCAN PRODUCT GTIN"
-            android:textColor="#A855F7"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -329,7 +329,7 @@
             android:id="@+id/gtinInput"
             android:hint="Enter / paste GTIN"
             android:textColorHint="#A855F7"
-            android:textColor="#A855F7"
+            android:textColor="#FFFFFF"
             android:inputType="number"
             android:singleLine="true"
             android:textSize="17sp"
@@ -383,13 +383,13 @@
                     android:layout_gravity="center"
                     android:textSize="21sp"
                     android:textStyle="bold"
-                    android:textColor="#A855F7"
+                    android:textColor="#FFFFFF"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
                 <TextView
                     android:id="@+id/productInfo"
-                    android:textColor="#A855F7"
+                    android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:layout_marginTop="14dp"
                     android:lineSpacingExtra="7dp"
@@ -418,7 +418,7 @@
 
                     <TextView
                         android:text="GTIN"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -451,7 +451,7 @@
 
                     <TextView
                         android:text="PARTNER ID"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -484,7 +484,7 @@
 
                     <TextView
                         android:text="SHELF LIFE"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -517,7 +517,7 @@
 
                     <TextView
                         android:text="KEEP LIFE"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -550,7 +550,7 @@
 
                     <TextView
                         android:text="PRODUCTION DATE"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -583,7 +583,7 @@
 
                     <TextView
                         android:text="SHELF LIFE DATE"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -616,7 +616,7 @@
 
                     <TextView
                         android:text="KEEP LIFE DATE"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -649,7 +649,7 @@
 
                     <TextView
                         android:text="REMAINING KEEP LIFE"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -682,7 +682,7 @@
 
                     <TextView
                         android:text="STATUS"
-                        android:textColor="#A855F7"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_width="0dp"
@@ -715,7 +715,7 @@
 
                 <TextView
                     android:text="QR GENERATED"
-                    android:textColor="#A855F7"
+                    android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.08"
@@ -792,7 +792,7 @@
                 android:text="Product not found"
                 android:textSize="17sp"
                 android:textStyle="bold"
-                android:textColor="#A855F7"
+                android:textColor="#FFFFFF"
                 android:visibility="gone"
                 android:layout_marginTop="14dp"
                 android:padding="16dp"
@@ -807,7 +807,7 @@
     <TextView
         android:id="@+id/statusText"
         android:text="Opening camera…"
-        android:textColor="#A855F7"
+        android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold"
         android:gravity="center"
