@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         slKlShelfLifeDateValue=findViewById(R.id.slKlShelfLifeDateValue);
         slKlKeepLifeDateValue=findViewById(R.id.slKlKeepLifeDateValue);
         slKlRemainingValue=findViewById(R.id.slKlRemainingValue);
-        slKlRemainingValue.setTextColor(Color.parseColor("#FCFC3D"));
+        slKlRemainingValue.setTextColor(Color.parseColor("#A855F7"));
         slKlRemainingValue.setTextSize(18);
         slKlRemainingValue.setTypeface(null, android.graphics.Typeface.BOLD);
         slKlStatusValue=findViewById(R.id.slKlStatusValue);
@@ -217,9 +217,9 @@ public class MainActivity extends AppCompatActivity {
              if(hb != null) hb.setOnClickListener(v -> openHistory());
         }catch(Exception ignored){}
 
-        resultTitle.setTextColor(Color.parseColor("#FCFC3D"));
-        info.setTextColor(Color.parseColor("#FCFC3D"));
-        notFound.setTextColor(Color.parseColor("#FCFC3D"));
+        resultTitle.setTextColor(Color.parseColor("#A855F7"));
+        info.setTextColor(Color.parseColor("#A855F7"));
+        notFound.setTextColor(Color.parseColor("#A855F7"));
     }
     void showModeScreen(){
         stopCamera();
@@ -667,7 +667,7 @@ public class MainActivity extends AppCompatActivity {
 
         historyPanel = new LinearLayout(this);
         historyPanel.setOrientation(LinearLayout.VERTICAL);
-        historyPanel.setBackgroundColor(Color.parseColor("#2E2E2E"));
+        historyPanel.setBackgroundColor(Color.parseColor("#111318"));
         historyPanel.setVisibility(View.GONE);
 
         /* Header row */
@@ -675,7 +675,7 @@ public class MainActivity extends AppCompatActivity {
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(android.view.Gravity.CENTER_VERTICAL);
         header.setPadding(16, 16, 16, 16);
-        header.setBackgroundColor(Color.parseColor("#2E2E2E"));
+        header.setBackgroundColor(Color.parseColor("#111318"));
 
         Button backBtn = new Button(this);
         backBtn.setText("\u2190");
@@ -687,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText("HISTORY");
-        title.setTextColor(Color.parseColor("#FCFC3D"));
+        title.setTextColor(Color.parseColor("#A855F7"));
         title.setTextSize(22);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
@@ -830,7 +830,7 @@ public class MainActivity extends AppCompatActivity {
         if(historyEntries.isEmpty()){
             TextView empty = new TextView(this);
             empty.setText("No history yet.\n\nScanned and OCR-detected values will appear here.");
-            empty.setTextColor(Color.parseColor("#FCFC3D"));
+            empty.setTextColor(Color.parseColor("#A855F7"));
             empty.setTextSize(15);
             empty.setGravity(android.view.Gravity.CENTER);
             empty.setPadding(20, 80, 20, 20);
@@ -859,7 +859,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView t = new TextView(this);
         t.setText(he.type);
-        t.setTextColor(Color.parseColor("#FCFC3D"));
+        t.setTextColor(Color.parseColor("#A855F7"));
         t.setTextSize(12);
         t.setTypeface(null, android.graphics.Typeface.BOLD);
         t.setLetterSpacing(0.1f);
@@ -1500,7 +1500,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.parseColor("#FCFC3D"));
+        title.setTextColor(Color.parseColor("#A855F7"));
         title.setTextSize(17);
         title.setTypeface(null,android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
@@ -1665,7 +1665,7 @@ public class MainActivity extends AppCompatActivity {
                         slKlProductionDateValue.setText(
                             productionDate.format(formatter)
                         );
-                        slKlProductionDateValue.setTextColor(Color.parseColor("#FCFC3D"));
+                        slKlProductionDateValue.setTextColor(Color.parseColor("#A855F7"));
 
                         if(!p.shelfLife.isEmpty()){
                             long shelfDays = Long.parseLong(p.shelfLife);
@@ -1675,7 +1675,7 @@ public class MainActivity extends AppCompatActivity {
                             slKlShelfLifeDateValue.setText(
                                 shelfLifeDate.format(formatter)
                             );
-                            slKlShelfLifeDateValue.setTextColor(Color.parseColor("#FCFC3D"));
+                            slKlShelfLifeDateValue.setTextColor(Color.parseColor("#A855F7"));
                         }else{
                             slKlShelfLifeDateValue.setText("—");
                         }
@@ -1688,7 +1688,7 @@ public class MainActivity extends AppCompatActivity {
                             slKlKeepLifeDateValue.setText(
                                 keepLifeDate.format(formatter)
                             );
-                            slKlKeepLifeDateValue.setTextColor(Color.parseColor("#FCFC3D"));
+                            slKlKeepLifeDateValue.setTextColor(Color.parseColor("#A855F7"));
 
                             LocalDate todayDate = LocalDate.now();
 
@@ -1719,7 +1719,7 @@ public class MainActivity extends AppCompatActivity {
                             slKlKeepLifeDateValue.setText("—");
                             slKlRemainingValue.setText("—");
                             slKlStatusValue.setText("—");
-                            slKlStatusValue.setTextColor(Color.parseColor("#FCFC3D"));
+                            slKlStatusValue.setTextColor(Color.parseColor("#A855F7"));
                         }
 
                     }catch(Exception e){
@@ -1867,7 +1867,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView edit = new TextView(this);
         edit.setText("✎  EDIT");
-        edit.setTextColor(Color.parseColor("#FCFC3D"));
+        edit.setTextColor(Color.parseColor("#A855F7"));
         edit.setTextSize(15);
         edit.setTypeface(null,android.graphics.Typeface.BOLD);
         edit.setGravity(android.view.Gravity.CENTER);
@@ -1877,7 +1877,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView copy = new TextView(this);
         copy.setText("⧉  COPY");
-        copy.setTextColor(Color.parseColor("#FCFC3D"));
+        copy.setTextColor(Color.parseColor("#A855F7"));
         copy.setTextSize(15);
         copy.setTypeface(null,android.graphics.Typeface.BOLD);
         copy.setGravity(android.view.Gravity.CENTER);
@@ -2014,7 +2014,7 @@ public class MainActivity extends AppCompatActivity {
         gtinLabel.setText(
             "GTIN/pbarcode_canonical :  " + p.gtin
         );
-        gtinLabel.setTextColor(Color.parseColor("#FCFC3D"));
+        gtinLabel.setTextColor(Color.parseColor("#A855F7"));
         gtinLabel.setTextSize(16);
         gtinLabel.setTypeface(
             null,
@@ -2045,7 +2045,7 @@ public class MainActivity extends AppCompatActivity {
         wmsLabel.setText(
             "WMS barcode :  " + p.wms
         );
-        wmsLabel.setTextColor(Color.parseColor("#FCFC3D"));
+        wmsLabel.setTextColor(Color.parseColor("#A855F7"));
         wmsLabel.setTextSize(16);
         wmsLabel.setTypeface(
             null,
@@ -2105,7 +2105,7 @@ public class MainActivity extends AppCompatActivity {
         partnerLabel.setText(
             "Partner ID :  " + p.partner
         );
-        partnerLabel.setTextColor(Color.parseColor("#FCFC3D"));
+        partnerLabel.setTextColor(Color.parseColor("#A855F7"));
         partnerLabel.setTextSize(16);
         partnerLabel.setTypeface(
             null,

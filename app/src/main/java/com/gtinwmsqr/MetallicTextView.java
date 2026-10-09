@@ -33,10 +33,10 @@ public class MetallicTextView extends AppCompatTextView {
         if (h <= 0) return;
         // Metallic yellow: bright top -> base -> secondary highlight -> dark gold
         int[] colors = new int[] {
-            0xFFFFF7A8,
-            0xFFFCFC3D,
-            0xFFFFFC85,
-            0xFFB8B818
+            0xFFA855F7,  // violet
+            0xFF8B5CF6,  // purple
+            0xFF3B82F6,  // electric blue
+            0xFF06B6D4   // cyan
         };
         float[] pos = new float[] { 0f, 0.35f, 0.55f, 1f };
         gradient = new LinearGradient(0, 0, 0, h, colors, pos,

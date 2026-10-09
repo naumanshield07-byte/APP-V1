@@ -17,7 +17,7 @@ public class ScanFrameView extends View {
         frame.setStrokeWidth(dp(4));
         frame.setStrokeCap(Paint.Cap.SQUARE);
         overlay.setStyle(Paint.Style.FILL);
-        overlay.setColor(0x73333333); /* 45% opacity dark grey */
+        overlay.setColor(0x730A0B10); /* 45% opacity dark grey */
     }
 
     private float dp(float v){
@@ -46,7 +46,7 @@ public class ScanFrameView extends View {
         float len = dp(42);
 
         /* Top-left */
-        frame.setColor(0xFF42A5F5);
+        frame.setColor(0xFF06B6D4);
         frame.setStrokeWidth(dp(4));
         c.drawLine(l, t, l + len, t, frame);
         c.drawLine(l, t, l, t + len, frame);
@@ -65,7 +65,7 @@ public class ScanFrameView extends View {
 
         /* Center scan line */
         frame.setStrokeWidth(dp(2));
-        frame.setColor(0xAA42A5F5);
+        frame.setColor(0xAA22B8E6);
         c.drawLine(l + dp(12), t + boxH / 2f, r - dp(12), t + boxH / 2f, frame);
     }
 }

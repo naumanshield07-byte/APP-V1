@@ -1,41 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
 
-    <!-- Grey rounded badge base -->
-    <path android:fillColor="#3A3A3A"
+    <!-- Outer purple neon glow -->
+    <path android:fillColor="#3D8B5CF6"
+        android:pathData="M36,22 L72,22 Q80,22 80,30 L80,78 Q80,86 72,86 L36,86 Q28,86 28,78 L28,30 Q28,22 36,22 Z"/>
+
+    <!-- Badge body: near-black -->
+    <path android:fillColor="#0D0E15"
         android:pathData="M38,26 L70,26 Q78,26 78,34 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 L30,34 Q30,26 38,26 Z"/>
 
-    <!-- Top gloss (lighter grey, curved bottom edge) -->
-    <path android:fillColor="#4A4A4A"
-        android:pathData="M38,26 L70,26 Q78,26 78,34 L78,48 Q54,54 30,48 L30,34 Q30,26 38,26 Z"/>
+    <!-- Barcode: purple -> blue -> cyan gradient effect -->
+    <path android:fillColor="#A855F7" android:pathData="M38,44 L41,44 L41,68 L38,68 Z"/>
+    <path android:fillColor="#8B5CF6" android:pathData="M45,44 L48,44 L48,68 L45,68 Z"/>
+    <path android:fillColor="#5C6EF0" android:pathData="M52,44 L56,44 L56,68 L52,68 Z"/>
+    <path android:fillColor="#3B82F6" android:pathData="M60,44 L63,44 L63,68 L60,68 Z"/>
+    <path android:fillColor="#06B6D4" android:pathData="M67,44 L70,44 L70,68 L67,68 Z"/>
 
-    <!-- Glass shine (soft white dome) -->
-    <path android:fillColor="#44FFFFFF"
-        android:pathData="M40,29 L68,29 Q74,29 74,35 L74,45 Q54,49 34,45 L34,35 Q34,29 40,29 Z"/>
-
-    <!-- Bottom shade (darker grey) -->
-    <path android:fillColor="#1A1A1A"
-        android:pathData="M30,68 Q54,74 78,68 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 Z"/>
-
-    <!-- Yellow barcode lines -->
-    <path android:fillColor="#FCFC3D"
-        android:pathData="M38,52 L41,52 L41,72 L38,72 Z"/>
-    <path android:fillColor="#FCFC3D"
-        android:pathData="M45,52 L48,52 L48,72 L45,72 Z"/>
-    <path android:fillColor="#FCFC3D"
-        android:pathData="M52,52 L56,52 L56,72 L52,72 Z"/>
-    <path android:fillColor="#FCFC3D"
-        android:pathData="M60,52 L63,52 L63,72 L60,72 Z"/>
-    <path android:fillColor="#FCFC3D"
-        android:pathData="M67,52 L70,52 L70,72 L67,72 Z"/>
-
-    <!-- Red rim -->
-    <path android:strokeColor="#FF0000"
-        android:strokeWidth="2"
+    <!-- Inner rim: soft purple -->
+    <path android:strokeColor="#A855F7" android:strokeWidth="1.5"
         android:fillColor="#00000000"
         android:pathData="M38,26 L70,26 Q78,26 78,34 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 L30,34 Q30,26 38,26 Z"/>
 </vector>
