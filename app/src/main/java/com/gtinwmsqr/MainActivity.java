@@ -856,6 +856,51 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void showQrDialog(String value, String type){
+        try{
+            Bitmap bmp = makeQr(value, 900);
+
+            LinearLayout box = new LinearLayout(this);
+            box.setOrientation(LinearLayout.VERTICAL);
+            box.setPadding(30, 30, 30, 30);
+            box.setGravity(android.view.Gravity.CENTER);
+
+            ImageView iv = new ImageView(this);
+            int side = (int)(260 * getResources().getDisplayMetrics().density);
+            LinearLayout.LayoutParams ip =
+                new LinearLayout.LayoutParams(side, side);
+            iv.setLayoutParams(ip);
+            iv.setImageBitmap(bmp);
+            iv.setBackgroundColor(Color.WHITE);
+            iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            box.addView(iv);
+
+            TextView tv = new TextView(this);
+            tv.setText(value);
+            tv.setTextColor(Color.WHITE);
+            tv.setTextSize(16);
+            tv.setTypeface(null, android.graphics.Typeface.BOLD);
+            tv.setPadding(0, 20, 0, 0);
+            tv.setGravity(android.view.Gravity.CENTER);
+            box.addView(tv);
+
+            new android.app.AlertDialog.Builder(this)
+                .setTitle(type + " \u2014 QR")
+                .setView(box)
+                .setNegativeButton("CLOSE", null)
+                .setNeutralButton("COPY",
+                    (d, w) -> copyValue(value))
+                .setPositiveButton("SHARE",
+                    (d, w) -> shareValue(type, value))
+                .show();
+
+        }catch(Exception e){
+            Toast.makeText(this,
+                "QR error: " + e.getMessage(),
+                Toast.LENGTH_LONG).show();
+        }
+    }
+
     View buildHistoryCard(HistoryEntry he){
 
         LinearLayout card = new LinearLayout(this);
