@@ -667,7 +667,7 @@ public class MainActivity extends AppCompatActivity {
 
         historyPanel = new LinearLayout(this);
         historyPanel.setOrientation(LinearLayout.VERTICAL);
-        historyPanel.setBackgroundColor(Color.parseColor("#080808"));
+        historyPanel.setBackgroundColor(Color.parseColor("#2E2E2E"));
         historyPanel.setVisibility(View.GONE);
 
         /* Header row */
@@ -675,7 +675,7 @@ public class MainActivity extends AppCompatActivity {
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(android.view.Gravity.CENTER_VERTICAL);
         header.setPadding(16, 16, 16, 16);
-        header.setBackgroundColor(Color.parseColor("#080808"));
+        header.setBackgroundColor(Color.parseColor("#2E2E2E"));
 
         Button backBtn = new Button(this);
         backBtn.setText("\u2190");

@@ -1,21 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Outer white halo, weakest -->
+    <item android:top="-16dp" android:bottom="-16dp"
+          android:left="-16dp" android:right="-16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#08FFFFFF"/>
+            <corners android:radius="40dp"/>
+        </shape>
+    </item>
+
+    <!-- Mid halo -->
+    <item android:top="-11dp" android:bottom="-11dp"
+          android:left="-11dp" android:right="-11dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#14FFFFFF"/>
+            <corners android:radius="35dp"/>
+        </shape>
+    </item>
+
+    <!-- Inner halo -->
+    <item android:top="-7dp" android:bottom="-7dp"
+          android:left="-7dp" android:right="-7dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#26FFFFFF"/>
+            <corners android:radius="31dp"/>
+        </shape>
+    </item>
+
+    <!-- Closest halo (brightest at card edge) -->
+    <item android:top="-3dp" android:bottom="-3dp"
+          android:left="-3dp" android:right="-3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#4DFFFFFF"/>
+            <corners android:radius="27dp"/>
+        </shape>
+    </item>
+
+    <!-- Card body: glossy dark + red border -->
     <item>
         <shape android:shape="rectangle">
             <gradient android:type="linear" android:angle="270"
                 android:startColor="#262626"
                 android:centerColor="#141414"
-                android:endColor="#080808"/>
+                android:endColor="#0A0A0A"/>
             <stroke android:width="2dp" android:color="#FF0000"/>
-            <corners android:radius="20dp"/>
+            <corners android:radius="24dp"/>
         </shape>
     </item>
-    <item android:top="2dp" android:left="8dp" android:right="8dp" android:bottom="120dp">
+
+    <!-- Gloss sheen inside card (top) -->
+    <item android:top="2dp" android:left="8dp" android:right="8dp"
+          android:bottom="120dp">
         <shape android:shape="rectangle">
             <gradient android:type="linear" android:angle="270"
                 android:startColor="#33FCFC3D"
                 android:endColor="#00FCFC3D"/>
-            <corners android:radius="16dp"/>
+            <corners android:radius="20dp"/>
         </shape>
     </item>
 </layer-list>

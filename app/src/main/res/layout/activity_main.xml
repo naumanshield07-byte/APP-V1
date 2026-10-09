@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#080808"
+    android:background="#2E2E2E"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,7 +10,7 @@
         android:id="@+id/modeSelection"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#080808"
+        android:background="#2E2E2E"
         android:padding="24dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -198,7 +198,7 @@
         android:gravity="center_vertical"
         android:paddingStart="18dp"
         android:paddingEnd="12dp"
-        android:background="#080808"
+        android:background="#2E2E2E"
         android:layout_width="match_parent"
         android:layout_height="64dp">
 
@@ -241,7 +241,7 @@
     <!-- CAMERA / SCANNER -->
     <FrameLayout
         android:id="@+id/cameraCard"
-        android:background="#080808"
+        android:background="#2E2E2E"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -279,7 +279,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="#080808"
+            android:background="#2E2E2E"
             android:padding="12dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="82dp"
@@ -292,7 +292,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="#080808"
+            android:background="#2E2E2E"
             android:padding="8dp"
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
@@ -320,7 +320,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="12dp"
-        android:background="#080808"
+        android:background="#2E2E2E"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -334,7 +334,7 @@
             android:singleLine="true"
             android:textSize="17sp"
             android:padding="12dp"
-            android:background="#080808"
+            android:background="#2E2E2E"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="56dp"/>
@@ -356,7 +356,7 @@
     <ScrollView
         android:id="@+id/resultScroll"
         android:fillViewport="true"
-        android:background="#080808"
+        android:background="#2E2E2E"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -364,7 +364,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:padding="16dp"
-            android:background="#080808"
+            android:background="#2E2E2E"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -796,7 +796,7 @@
                 android:visibility="gone"
                 android:layout_marginTop="14dp"
                 android:padding="16dp"
-                android:background="#080808"
+                android:background="#2E2E2E"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -811,7 +811,7 @@
         android:textSize="12sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:background="#080808"
+        android:background="#2E2E2E"
         android:padding="6dp"
         android:layout_width="match_parent"
         android:layout_height="32dp"/>
