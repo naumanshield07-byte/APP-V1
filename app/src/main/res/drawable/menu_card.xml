@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Outer soft purple halo -->
+    <item android:top="-14dp" android:bottom="-14dp"
+          android:left="-14dp" android:right="-14dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#0F8B5CF6"/>
+            <corners android:radius="36dp"/>
+        </shape>
+    </item>
+    <!-- Mid halo -->
+    <item android:top="-9dp" android:bottom="-9dp"
+          android:left="-9dp" android:right="-9dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#228B5CF6"/>
+            <corners android:radius="31dp"/>
+        </shape>
+    </item>
+    <!-- Inner bright halo -->
+    <item android:top="-4dp" android:bottom="-4dp"
+          android:left="-4dp" android:right="-4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#448B5CF6"/>
+            <corners android:radius="26dp"/>
+        </shape>
+    </item>
+
+    <!-- Card body: near-black with subtle top-to-bottom gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:type="linear" android:angle="270"
+                android:startColor="#15161E"
+                android:centerColor="#0C0D13"
+                android:endColor="#09090D"/>
+            <stroke android:width="1dp" android:color="#8B5CF6"/>
+            <corners android:radius="22dp"/>
+        </shape>
+    </item>
+
+    <!-- Top inner shine (subtle purple sheen) -->
+    <item android:top="2dp" android:left="10dp" android:right="10dp"
+          android:bottom="72dp">
+        <shape android:shape="rectangle">
+            <gradient android:type="linear" android:angle="270"
+                android:startColor="#2AA855F7"
+                android:endColor="#00A855F7"/>
+            <corners android:radius="18dp"/>
+        </shape>
+    </item>
+</layer-list>
