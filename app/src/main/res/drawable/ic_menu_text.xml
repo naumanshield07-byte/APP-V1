@@ -2,13 +2,13 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="56dp" android:height="56dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:strokeColor="#000000" android:strokeWidth="6"
+    <path android:strokeColor="#6B4F00" android:strokeWidth="6"
         android:fillColor="#00000000"
         android:pathData="M46,46 m-22,0 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0"/>
-    <path android:strokeColor="#000000" android:strokeWidth="6"
+    <path android:strokeColor="#6B4F00" android:strokeWidth="6"
         android:strokeLineCap="round"
         android:pathData="M62,62 L84,84"/>
-    <path android:strokeColor="#000000" android:strokeWidth="4"
+    <path android:strokeColor="#6B4F00" android:strokeWidth="4"
         android:strokeLineCap="round"
         android:pathData="M34,40 L58,40 M34,48 L52,48 M34,56 L58,56"/>
 </vector>

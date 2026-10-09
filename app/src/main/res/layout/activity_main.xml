@@ -24,11 +24,11 @@
             android:layout_width="180dp"
             android:layout_height="180dp"/>
 
-        <TextView
-            android:text="TOOLS"
-            android:textColor="#FCFC3D"
-            android:textSize="30sp"
+        <com.gtinwmsqr.MetallicTextView
+            android:text="T  O  O  L  S"
+            android:textSize="44sp"
             android:textStyle="bold"
+            android:letterSpacing="0.18"
             android:gravity="center"
             android:layout_marginTop="8dp"
             android:layout_width="match_parent"
@@ -62,7 +62,7 @@
 
                 <TextView
                     android:text="SCANNER"
-                    android:textColor="#000000"
+                    android:textColor="#6B4F00"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:letterSpacing="0.04"
@@ -93,7 +93,7 @@
 
                 <TextView
                     android:text="TEXT SCANNER"
-                    android:textColor="#000000"
+                    android:textColor="#6B4F00"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:letterSpacing="0.04"
@@ -124,7 +124,7 @@
 
                 <TextView
                     android:text="SL = KL"
-                    android:textColor="#000000"
+                    android:textColor="#6B4F00"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:letterSpacing="0.04"
@@ -155,7 +155,7 @@
 
                 <TextView
                     android:text="HISTORY"
-                    android:textColor="#000000"
+                    android:textColor="#6B4F00"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:letterSpacing="0.04"
@@ -182,7 +182,7 @@
             android:text="IMPORT / UPDATE CATALOG"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:textColor="#6B4F00"
             android:textSize="15sp"
             android:background="@drawable/glow_button_red"
             android:minHeight="52dp"
@@ -261,7 +261,7 @@
             android:text="← MENU"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:textColor="#6B4F00"
             android:background="@drawable/glow_button_red"
             android:minHeight="48dp"
             android:paddingStart="18dp"
@@ -303,7 +303,7 @@
                 android:text="⌨  Enter GTIN manually"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                android:textColor="#000000"
+                android:textColor="#6B4F00"
                 android:background="@drawable/glow_button_red"
                 android:minHeight="52dp"
                 android:minWidth="220dp"
@@ -344,7 +344,7 @@
             android:text="Find"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:textColor="#6B4F00"
             android:background="@drawable/glow_button_red"
             android:minHeight="52dp"
             android:layout_marginStart="10dp"
@@ -752,7 +752,7 @@
                     android:text="↓  Save QR"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="#000000"
+                    android:textColor="#6B4F00"
                     android:background="@drawable/glow_button_red"
                     android:minHeight="56dp"
                     android:layout_weight="1"
@@ -764,7 +764,7 @@
                     android:text="Print"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="#000000"
+                    android:textColor="#6B4F00"
                     android:background="@drawable/glow_button_red"
                     android:minHeight="56dp"
                     android:layout_marginStart="10dp"
@@ -779,7 +779,7 @@
                 android:text="📷  Scan Another GTIN"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                android:textColor="#000000"
+                android:textColor="#6B4F00"
                 android:background="@drawable/glow_button_red"
                 android:minHeight="56dp"
                 android:layout_marginTop="12dp"
