@@ -878,21 +878,44 @@ public class MainActivity extends AppCompatActivity {
         t.setLetterSpacing(0.1f);
         card.addView(t);
 
+        LinearLayout valueRow = new LinearLayout(this);
+        valueRow.setOrientation(LinearLayout.HORIZONTAL);
+        valueRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        valueRow.setPadding(0, 8, 0, 4);
+
         TextView v = new TextView(this);
         v.setText(he.value);
         v.setTextColor(Color.WHITE);
         v.setTextSize(18);
         v.setTypeface(null, android.graphics.Typeface.BOLD);
-        v.setPadding(0, 8, 0, 8);
-        card.addView(v);
+
+        LinearLayout.LayoutParams vp = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f
+        );
+        valueRow.addView(v, vp);
+
+        TextView viewQr = new TextView(this);
+        viewQr.setText("VIEW QR");
+        viewQr.setTextColor(Color.parseColor("#A855F7"));
+        viewQr.setTextSize(11);
+        viewQr.setTypeface(null, android.graphics.Typeface.BOLD);
+        viewQr.setLetterSpacing(0.1f);
+        viewQr.setPadding(16, 10, 16, 10);
+        viewQr.setBackgroundResource(R.drawable.glow_dark_button);
+        viewQr.setOnClickListener(x -> showQrDialog(he.value, he.type));
+        valueRow.addView(viewQr);
+
+        card.addView(valueRow);
 
         TextView ts = new TextView(this);
-        ts.setText(formatTime(he.ts) + "   \u2022   " + he.source);
+        ts.setText(formatTime(he.ts) + "   •   " + he.source);
         ts.setTextColor(Color.parseColor("#999999"));
         ts.setTextSize(11);
         card.addView(ts);
 
-        card.setOnClickListener(x -> copyValue(he.value));
+        v.setOnClickListener(x -> copyValue(he.value));
 
         return card;
     }
