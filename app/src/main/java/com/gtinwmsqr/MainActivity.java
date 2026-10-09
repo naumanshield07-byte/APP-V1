@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
-    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,Product> products=new HashMap<>(); Product last;
+    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,Product> products=new HashMap<>(); Product last;
 
     static class SlKlProduct {
         String gtin;
@@ -1172,144 +1172,89 @@ public class MainActivity extends AppCompatActivity {
         java.util.Set<String> locations){
 
         String text = raw.trim();
+        if(text.isEmpty()) return;
 
-        if(text.isEmpty()){
-            return;
-        }
-
-        /*
-         * Remove common OCR labels so values such as:
-         * GTIN: 9880000038750
-         * WMS: 11649903984P
-         * LOCATION: DS28-03-01-04A
-         * can also be recognized.
-         */
         text = text.replaceAll(
             "(?i)\\b(PBARCODE|P-BARCODE|GTIN|WMS|BARCODE|LOCATION|LOC)\\s*[:#-]?\\s*",
-            " "
-        ).trim();
+            " ").trim();
 
-        /*
-         * A line may contain more than one OCR element.
-         * Check the complete line first, then individual tokens.
-         */
         java.util.ArrayList<String> candidates =
             new java.util.ArrayList<>();
-
         candidates.add(text);
-
-        String[] parts = text.split("\\s+");
-
-        for(String part : parts){
+        for(String part : text.split("\\s+")){
             if(part != null && !part.trim().isEmpty()){
                 candidates.add(part.trim());
             }
         }
 
         for(String candidate : candidates){
-
             String value = candidate.trim();
+            if(value.isEmpty()) continue;
 
-            if(value.isEmpty()){
-                continue;
-            }
-
-            /*
-             * Remove OCR punctuation around a value.
-             * Keep internal hyphens because Location uses them.
-             */
             value = value.replaceAll(
-                "^[^A-Za-z0-9]+|[^A-Za-z0-9]+$",
-                ""
-            );
-
-            if(value.isEmpty()){
-                continue;
-            }
+                "^[^A-Za-z0-9]+|[^A-Za-z0-9]+$", "");
+            if(value.isEmpty()) continue;
 
             String normalized = value
                 .toUpperCase(java.util.Locale.US)
                 .replaceAll("\\s+", "");
 
-            /*
-             * 1. WMS BARCODE
-             *
-             * Catalog values look like:
-             * 11649903984P
-             */
-            /*
-             * 1. WMS BARCODE
-             *
-             * Accept catalog WMS values AND unknown WMS numbers
-             * ending with P.
-             *
-             * Example:
-             * 11649903984P
-             */
-            /*
-             * Apply OCR digit-confusion correction only when the
-             * candidate looks numeric. Protects alphanumeric codes.
-             */
             String correctedValue = normalized;
             if(looksLikeNumericCandidate(normalized)){
                 correctedValue = fixOcrDigits(normalized);
             }
 
-            /* 1. WMS BARCODE */
-            if(isKnownWms(normalized)
+            /* 1. WMS barcode: numeric + ends with P */
+            if(correctedValue.matches("\\d{8,14}P")
                     || isKnownWms(correctedValue)
-                    || normalized.matches("\\d{8,14}P")
-                    || correctedValue.matches("\\d{8,14}P")){
-
+                    || isKnownWms(normalized)){
                 wmsCodes.add(correctedValue);
                 continue;
             }
 
-            /* 2. GTIN / P-BARCODE (catalog or numeric) */
-            if(isKnownGtin(normalized)
-                    || isKnownGtin(correctedValue)
-                    || normalized.matches("\\d{8,14}")
-                    || correctedValue.matches("\\d{8,14}")){
-
-                gtins.add(correctedValue);
-                continue;
-            }
-
-            /* 2b. ALPHANUMERIC GTIN (non-catalog, mixed letters+digits) */
-            if(!isLocation(correctedValue)
-                    && correctedValue.matches("[A-Z0-9]{6,20}")
+            /* 2. GTIN */
+            if(correctedValue.matches("\\d+")){
+                boolean known = isKnownGtin(correctedValue)
+                             || isKnownGtin(normalized);
+                boolean checksumOk = bypassGtinChecksum
+                                  || isValidGtin(correctedValue);
+                if(known || checksumOk){
+                    gtins.add(correctedValue);
+                    continue;
+                }
+            } else if(correctedValue.matches("[A-Z0-9]{6,20}")
                     && correctedValue.matches(".*\\d.*")
-                    && correctedValue.matches(".*[A-Z].*")
-                    && !correctedValue.endsWith("P")){
-
-                gtins.add(correctedValue);
-                continue;
+                    && correctedValue.matches(".*[A-Z].*")){
+                if(isKnownGtin(correctedValue)
+                        || isKnownGtin(normalized)){
+                    gtins.add(correctedValue);
+                    continue;
+                }
             }
 
-            /*
-             * 3. LOCATION
-             *
-             * Example:
-             * DS28-03-01-04A
-             *
-             * This deliberately requires the structured
-             * warehouse-location format rather than accepting
-             * arbitrary OCR text.
-             */
-            /*
-             * 3. LOCATION
-             *
-             * Validate against the exact warehouse location
-             * formats. OCR correction is position-aware and
-             * only accepted when the corrected value becomes
-             * a valid location.
-             */
+            /* 3. Location */
             String correctedLocation = correctOcrLocation(normalized);
-
             if(correctedLocation != null){
                 locations.add(correctedLocation);
             }
         }
+    }
+
+
+    boolean isValidGtin(String v){
+        if(v == null) return false;
+        if(!v.matches("\\d+")) return false;
+        int len = v.length();
+        if(len != 8 && len != 12 && len != 13 && len != 14) return false;
+        int sum = 0;
+        int startW = (len == 13) ? 1 : 3;
+        for(int i = 0; i < len - 1; i++){
+            int d = v.charAt(i) - '0';
+            int w = (i % 2 == 0) ? startW : (4 - startW);
+            sum += d * w;
+        }
+        int check = (10 - (sum % 10)) % 10;
+        return check == (v.charAt(len - 1) - '0');
     }
 
 
