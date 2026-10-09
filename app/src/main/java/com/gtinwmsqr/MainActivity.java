@@ -178,8 +178,7 @@ public class MainActivity extends AppCompatActivity {
         slKlStatusValue.setTextSize(20);
         slKlStatusValue.setTypeface(null, android.graphics.Typeface.BOLD);
         slKlStatusValue.setLetterSpacing(0.08f);
-        notFound=findViewById(R.id.notFoundText);
-        applyRoundedClip(qr, 20f); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
+        notFound=findViewById(R.id.notFoundText); input=findViewById(R.id.gtinInput); qr=findViewById(R.id.qrImage);
         manualPanel=findViewById(R.id.manualPanel); cameraCard=findViewById(R.id.cameraCard); resultScroll=findViewById(R.id.resultScroll);
         flashButton=findViewById(R.id.flashButton); manualButton=findViewById(R.id.manualButton);
         manualButtonOriginalText=manualButton.getText().toString();
@@ -1540,8 +1539,7 @@ public class MainActivity extends AppCompatActivity {
 
         image.setLayoutParams(imgParams);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        image.setBackgroundResource(R.drawable.qr_rounded_bg);
-        applyRoundedClip(image, 20f);
+        image.setBackgroundColor(Color.WHITE);
 
         try{
             image.setImageBitmap(makeQr(value,1200));
