@@ -1948,6 +1948,19 @@ public class MainActivity extends AppCompatActivity {
         input.setText(key);
         notFound.setVisibility(View.GONE);
 
+        /* Hide keyboard when result page opens */
+        try{
+            android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager)
+                getSystemService(INPUT_METHOD_SERVICE);
+            android.view.View focused = getCurrentFocus();
+            if(imm != null && focused != null){
+                imm.hideSoftInputFromWindow(
+                    focused.getWindowToken(), 0);
+            }
+            input.clearFocus();
+        }catch(Exception ignored){}
+
         if(key.isEmpty())return;
 
         List<Product> list = products.get(key);
@@ -2047,7 +2060,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView share = new TextView(this);
         share.setText("⤴  SHARE");
-        share.setTextColor(Color.WHITE);
+        share.setTextColor(Color.parseColor("#A855F7"));
         share.setTextSize(15);
         share.setTypeface(null,android.graphics.Typeface.BOLD);
         share.setGravity(android.view.Gravity.CENTER);
