@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.print.PrintAttributes;
-import android.print.PrintManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
-    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,Product> products=new HashMap<>(); Product last;
+    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; java.util.concurrent.ExecutorService qrExecutor = java.util.concurrent.Executors.newFixedThreadPool(2); boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,Product> products=new HashMap<>(); Product last;
 
     static class SlKlProduct {
         String gtin;
@@ -212,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
             qrCard.setVisibility(View.VISIBLE);
             startCamera();
         });
-        findViewById(R.id.saveButton).setOnClickListener(v->saveQr()); findViewById(R.id.printButton).setOnClickListener(v->printQr());
+        findViewById(R.id.saveButton).setOnClickListener(v->saveQr());
         manualButton.setOnClickListener(v->{
             if(textQrMode){
                 captureOcrResults();
@@ -1554,13 +1553,18 @@ public class MainActivity extends AppCompatActivity {
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
         image.setBackgroundColor(Color.WHITE);
 
-        try{
-            image.setImageBitmap(makeQr(value,1200));
-        }catch(Exception e){
-            content.setText(
-                value + "\n\nQR error: " + e.getMessage()
-            );
-        }
+        final String qrVal = value;
+        final ImageView qrImg = image;
+        final TextView qrContent = content;
+        qrExecutor.submit(() -> {
+            try{
+                final Bitmap bmp = makeQr(qrVal, 600);
+                runOnUiThread(() -> qrImg.setImageBitmap(bmp));
+            }catch(final Exception ex){
+                runOnUiThread(() -> qrContent.setText(
+                    qrVal + "\n\nQR error: " + ex.getMessage()));
+            }
+        });
 
         LinearLayout actions = createActionRow(
             () -> editValueDialog(
@@ -1828,7 +1832,7 @@ public class MainActivity extends AppCompatActivity {
         showProductionDatePicker(p);
 
         findViewById(R.id.saveButton).setVisibility(View.GONE);
-        findViewById(R.id.printButton).setVisibility(View.GONE);
+        
 
         resultScroll.post(()->resultScroll.requestFocus());
     }
@@ -1863,7 +1867,7 @@ public class MainActivity extends AppCompatActivity {
         slKlResultCard.setVisibility(View.GONE);
         qrCard.setVisibility(View.VISIBLE);
         findViewById(R.id.saveButton).setVisibility(View.VISIBLE);
-        findViewById(R.id.printButton).setVisibility(View.VISIBLE);
+        
 
         info.setText("");
         info.setVisibility(View.GONE);
@@ -2231,7 +2235,6 @@ public class MainActivity extends AppCompatActivity {
 
     Bitmap makeQr(String text,int size)throws WriterException{BitMatrix m=new MultiFormatWriter().encode(text,BarcodeFormat.QR_CODE,size,size);Bitmap b=Bitmap.createBitmap(size,size,Bitmap.Config.ARGB_8888);for(int y=0;y<size;y++)for(int x=0;x<size;x++)b.setPixel(x,y,m.get(x,y)?Color.BLACK:Color.WHITE);return b;}
     void saveQr(){if(last==null)return;Bitmap b;try{b=makeQr(last.wms,1000);}catch(Exception e){Toast.makeText(this,"QR generation failed: "+e.getMessage(),Toast.LENGTH_LONG).show();return;}String name="QR-"+last.wms+".png";ContentValues v=new ContentValues();v.put(MediaStore.Images.Media.DISPLAY_NAME,name);v.put(MediaStore.Images.Media.MIME_TYPE,"image/png");v.put(MediaStore.Images.Media.RELATIVE_PATH,"Pictures/GTIN-WMS-QR");try{android.net.Uri u=getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,v);try(OutputStream o=getContentResolver().openOutputStream(u)){b.compress(Bitmap.CompressFormat.PNG,100,o);}Toast.makeText(this,"QR saved to Pictures/GTIN-WMS-QR",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"Save failed: "+e.getMessage(),Toast.LENGTH_LONG).show();}}
-    void printQr(){if(last==null)return;PrintManager pm=(PrintManager)getSystemService(PRINT_SERVICE);pm.print("GTIN-WMS-QR-"+last.wms,new QrPrintAdapter(this,qr.getDrawable()),new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build());}
     @Override public void onBackPressed(){
         if(modeSelection!=null && modeSelection.getVisibility()==View.VISIBLE){
             super.onBackPressed();

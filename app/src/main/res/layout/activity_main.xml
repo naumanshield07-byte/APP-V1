@@ -759,18 +759,7 @@
                     android:layout_width="0dp"
                     android:layout_height="56dp"/>
 
-                <Button
-                    android:id="@+id/printButton"
-                    android:text="Print"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:background="@drawable/glow_button_red"
-                    android:minHeight="56dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"/>
+                
             </LinearLayout>
 
             <!-- SCAN AGAIN -->
