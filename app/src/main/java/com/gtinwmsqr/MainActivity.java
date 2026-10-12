@@ -405,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
 
     Map<String,List<Product>> parseCatalog(String json) throws Exception{
         Map<String,List<Product>> parsed = new HashMap<>();
-        org.json.JSONReader r = new org.json.JSONReader(
+        android.util.JsonReader r = new android.util.JsonReader(
             new java.io.StringReader(json));
         try {
             r.beginArray();
@@ -456,6 +456,24 @@ public class MainActivity extends AppCompatActivity {
         }
         return parsed;
     }
+
+    String readStrSafe(android.util.JsonReader r) throws java.io.IOException {
+        android.util.JsonToken t = r.peek();
+        if(t == android.util.JsonToken.STRING){
+            return r.nextString();
+        } else if(t == android.util.JsonToken.NUMBER){
+            return String.valueOf(r.nextLong());
+        } else if(t == android.util.JsonToken.BOOLEAN){
+            return String.valueOf(r.nextBoolean());
+        } else if(t == android.util.JsonToken.NULL){
+            r.nextNull();
+            return "";
+        } else {
+            r.skipValue();
+            return "";
+        }
+    }
+
 
     String readStrSafe(org.json.JSONReader r){
         try {
