@@ -1173,9 +1173,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                                 for(String l : locations){
-                                    if(vote(voteLocations, l)){
-                                        bufferedLocations.add(l);
-                                    }
+                                    /* Locations have strict patterns — no voting needed */
+                                    bufferedLocations.add(l);
                                 }
 
                                 int total = bufferedGtins.size()
@@ -1425,36 +1424,76 @@ public class MainActivity extends AppCompatActivity {
             .toUpperCase(java.util.Locale.US)
             .replaceAll("\\s+", "");
 
-        /* Already valid — accept exactly as read */
+        /* 1. Already valid — accept exactly as read */
         if(isLocation(normalized)){
             return normalized;
         }
 
-        /*
-         * OCR commonly reads digit '1' as letter 'T'.
-         * Only correct T when it appears immediately after the
-         * region prefix AND the corrected value passes the
-         * strict location validator.
-         *
-         *   DST20-04-02-02C   -> DS120-04-02-02C
-         *   AJDST20-04-02-02C -> AJDS120-04-02-02C
-         *   SDST20-04-02-02C  -> SDS120-04-02-02C
-         *   ADST20-04-02-02C  -> ADS120-04-02-02C
-         *   RDST20-04-02-02C  -> RDS120-04-02-02C
-         */
         String[] prefixes = { "AJDS", "SDS", "ADS", "RDS", "DS" };
+
+        /* 2. T->1 correction (OCR reads digit 1 as letter T) */
         for(String pfx : prefixes){
             if(normalized.startsWith(pfx + "T")
                     && normalized.length() > pfx.length() + 1){
                 String corrected = pfx + "1"
                     + normalized.substring(pfx.length() + 1);
-                if(isLocation(corrected)){
-                    return corrected;
-                }
+                if(isLocation(corrected)) return corrected;
+            }
+        }
+
+        /* 3. OCR digit-confusion on numeric portions */
+        for(String pfx : prefixes){
+            if(normalized.startsWith(pfx)){
+                String rest = normalized.substring(pfx.length());
+                String fixedRest = fixLocationDigits(rest);
+                String candidate = pfx + fixedRest;
+                if(isLocation(candidate)) return candidate;
             }
         }
 
         return null;
+    }
+
+    /*
+     * Apply OCR digit-confusion correction to a location suffix,
+     * but preserve:
+     *   - hyphens
+     *   - format keywords (CHR, FZR, MDR, HDR, BSKT, HOOK)
+     *   - the trailing letter (A-H)
+     */
+    String fixLocationDigits(String rest){
+
+        if(rest == null || rest.isEmpty()) return rest;
+
+        String[] parts = rest.split("-", -1);
+        StringBuilder result = new StringBuilder();
+
+        for(int i = 0; i < parts.length; i++){
+            if(i > 0) result.append("-");
+            String part = parts[i];
+            if(part.isEmpty()) continue;
+
+            /*
+             * Only fix a segment if it's made entirely of digits and
+             * confusable letters. Anything containing a "real" letter
+             * (like C,H,R,F,K,M in CHR/FZR/MDR/HDR/BSKT/HOOK) is left
+             * untouched.
+             */
+            if(part.matches("[0-9OQDILZSGTB]+")){
+                char lastC = part.charAt(part.length() - 1);
+                if(lastC >= 'A' && lastC <= 'H'){
+                    /* Preserve trailing letter */
+                    String head = part.substring(0, part.length() - 1);
+                    result.append(fixOcrDigits(head)).append(lastC);
+                } else {
+                    result.append(fixOcrDigits(part));
+                }
+            } else {
+                result.append(part);
+            }
+        }
+
+        return result.toString();
     }
 
 
