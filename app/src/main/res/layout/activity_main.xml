@@ -714,6 +714,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+            android:id="@+id/qrGeneratedLabel"
                     android:text="QR GENERATED"
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"

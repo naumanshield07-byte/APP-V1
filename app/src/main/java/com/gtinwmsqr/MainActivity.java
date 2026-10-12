@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout slKlCardsContainer = null;
     LinearLayout ocrQrContainer;
     LinearLayout slKlResultCard, qrCard;
+    TextView qrGeneratedLabel;
     TextView slKlGtinValue, slKlPartnerValue, slKlShelfLifeValue, slKlKeepLifeValue;
     TextView slKlProductionDateValue, slKlShelfLifeDateValue, slKlKeepLifeDateValue;
     TextView slKlRemainingValue, slKlStatusValue;
@@ -87,7 +88,18 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout historyList;
     ScrollView historyScroll;
 
-    static class Product { String wms, gtin, partner, status; Product(JSONObject o){gtin=o.optString("pbarcode_canonical");wms=o.optString("wms_barcode");partner=o.optString("id_partner");status=o.optString("status");} }
+    static class Product {
+        String wms, gtin, partner, status;
+        Product(JSONObject o){
+            gtin=o.optString("pbarcode_canonical");
+            wms=o.optString("wms_barcode");
+            partner=o.optString("id_partner");
+            status=o.optString("status");
+        }
+        Product(String g, String w, String pa, String s){
+            gtin=g; wms=w; partner=pa; status=s;
+        }
+    }
     @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();loadSlKlCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
         textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
@@ -165,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
         ocrQrContainer=findViewById(R.id.ocrQrContainer);
         slKlResultCard=findViewById(R.id.slKlResultCard);
         qrCard=findViewById(R.id.qrCard);
+        qrGeneratedLabel=findViewById(R.id.qrGeneratedLabel);
         slKlGtinValue=findViewById(R.id.slKlGtinValue);
         slKlPartnerValue=findViewById(R.id.slKlPartnerValue);
         slKlShelfLifeValue=findViewById(R.id.slKlShelfLifeValue);
@@ -247,6 +260,9 @@ public class MainActivity extends AppCompatActivity {
         resultScroll.setVisibility(View.GONE);
         notFound.setVisibility(View.GONE);
         slKlResultCard.setVisibility(View.GONE);
+        if(qrGeneratedLabel != null){
+            qrGeneratedLabel.setVisibility(View.GONE);
+        }
         qrCard.setVisibility(View.VISIBLE);
         status.setText("Select scanning mode");
     }
@@ -388,53 +404,72 @@ public class MainActivity extends AppCompatActivity {
 
 
     Map<String,List<Product>> parseCatalog(String json) throws Exception{
+        Map<String,List<Product>> parsed = new HashMap<>();
+        org.json.JSONReader r = new org.json.JSONReader(
+            new java.io.StringReader(json));
+        try {
+            r.beginArray();
+            int row = 0;
+            while(r.hasNext()){
+                row++;
+                String gtin = "", wms = "", partner = "", status = "";
+                r.beginObject();
+                while(r.hasNext()){
+                    String name = r.nextName();
+                    if("pbarcode_canonical".equals(name)) gtin = readStrSafe(r);
+                    else if("wms_barcode".equals(name))   wms = readStrSafe(r);
+                    else if("id_partner".equals(name))    partner = readStrSafe(r);
+                    else if("status".equals(name))        status = readStrSafe(r);
+                    else r.skipValue();
+                }
+                r.endObject();
 
-        JSONArray a = new JSONArray(json);
+                gtin = gtin.trim();
+                wms = wms.trim();
 
-        if(a.length() == 0){
+                if(gtin.isEmpty()){
+                    throw new Exception(
+                        "Missing pbarcode_canonical at row " + row);
+                }
+                if(wms.isEmpty()){
+                    throw new Exception(
+                        "Missing wms_barcode at row " + row);
+                }
+
+                Product p = new Product(
+                    gtin, wms, partner.trim(), status.trim());
+
+                List<Product> bucket = parsed.get(gtin);
+                if(bucket == null){
+                    bucket = new java.util.ArrayList<>();
+                    parsed.put(gtin, bucket);
+                }
+                bucket.add(p);
+            }
+            r.endArray();
+        } finally {
+            try { r.close(); } catch(Exception ignored){}
+        }
+
+        if(parsed.isEmpty()){
             throw new Exception("Catalog is empty");
         }
-
-        Map<String,List<Product>> parsed = new HashMap<>();
-
-        for(int i=0;i<a.length();i++){
-
-            JSONObject object = a.getJSONObject(i);
-            Product p = new Product(object);
-
-            String gtin =
-                p.gtin == null ? "" : p.gtin.trim();
-
-            String wms =
-                p.wms == null ? "" : p.wms.trim();
-
-            if(gtin.isEmpty()){
-                throw new Exception(
-                    "Missing pbarcode_canonical at row "
-                    + (i + 1)
-                );
-            }
-
-            if(wms.isEmpty()){
-                throw new Exception(
-                    "Missing wms_barcode at row "
-                    + (i + 1)
-                );
-            }
-
-            p.gtin = gtin;
-            p.wms = wms;
-
-            List<Product> bucket = parsed.get(gtin);
-            if(bucket == null){
-                bucket = new java.util.ArrayList<>();
-                parsed.put(gtin, bucket);
-            }
-            bucket.add(p);
-        }
-
         return parsed;
     }
+
+    String readStrSafe(org.json.JSONReader r){
+        try {
+            return r.nextString();
+        } catch(Exception e) {
+            try {
+                Object v = r.nextValue();
+                return v == null ? "" : String.valueOf(v);
+            } catch(Exception e2) {
+                return "";
+            }
+        }
+    }
+
 
 
     void openCatalogPicker(){
@@ -2072,6 +2107,9 @@ public class MainActivity extends AppCompatActivity {
 
         resultTitle.setText("PRODUCT FOUND");
         slKlResultCard.setVisibility(View.GONE);
+        if(qrGeneratedLabel != null){
+            qrGeneratedLabel.setVisibility(View.VISIBLE);
+        }
         qrCard.setVisibility(View.VISIBLE);
         qr.setVisibility(View.GONE);
         ocrQrContainer.setVisibility(View.VISIBLE);
