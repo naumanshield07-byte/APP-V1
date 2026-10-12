@@ -1380,30 +1380,36 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /*
-         * Exact warehouse location formats:
+         * Warehouse location formats (5 regions):
          *
-         * 1. DSXXX-XX-XX-XXZ
-         * 2. DSXXX-CHR-XX-XXZ
-         * 3. DSXXX-FZR-XX-XXZ
-         * 4. DSXXX-MDRXX-XXZ
-         * 5. DSXXX-HDRXX-XXZ
-         * 6. DSXXX-BSKTXX-XX
-         * 7. DSXXX-HOOKXX-XXZ
+         *   Prefix (optional):
+         *     DS    - default region
+         *     AJDS  - region AJ
+         *     SDS   - region S
+         *     ADS   - region A
+         *     RDS   - region R
          *
-         * X = 0-9
-         * Z = A-H
-         * DS = constant
+         *   7 format variants per region:
+         *     <P>\d{2,3}-\d{2}-\d{2}-\d{2}[A-H]   standard
+         *     <P>\d{2,3}-CHR-\d{2}-\d{2}[A-H]       chiller
+         *     <P>\d{2,3}-FZR-\d{2}-\d{2}[A-H]       freezer
+         *     <P>\d{2,3}-MDR\d{2}-\d{2}[A-H]        multi-door
+         *     <P>\d{2,3}-HDR\d{2}-\d{2}[A-H]        heavy duty
+         *     <P>\d{2,3}-BSKT\d{2}-\d{2}            basket
+         *     <P>\d{2,3}-HOOK\d{2}-\d{2}[A-H]       hook
+         *
+         *   X = 0-9, Z = A-H only
          */
         return value.matches(
             "(?i)"
             + "(?:"
-            + "DS\\d{2,3}-\\d{2}-\\d{2}-\\d{2}[A-H]"
-            + "|DS\\d{2,3}-CHR-\\d{2}-\\d{2}[A-H]"
-            + "|DS\\d{2,3}-FZR-\\d{2}-\\d{2}[A-H]"
-            + "|DS\\d{2,3}-MDR\\d{2}-\\d{2}[A-H]"
-            + "|DS\\d{2,3}-HDR\\d{2}-\\d{2}[A-H]"
-            + "|DS\\d{2,3}-BSKT\\d{2}-\\d{2}"
-            + "|DS\\d{2,3}-HOOK\\d{2}-\\d{2}[A-H]"
+            + "(?:AJ|S|A|R)?DS\\d{2,3}-\\d{2}-\\d{2}-\\d{2}[A-H]"
+            + "|(?:AJ|S|A|R)?DS\\d{2,3}-CHR-\\d{2}-\\d{2}[A-H]"
+            + "|(?:AJ|S|A|R)?DS\\d{2,3}-FZR-\\d{2}-\\d{2}[A-H]"
+            + "|(?:AJ|S|A|R)?DS\\d{2,3}-MDR\\d{2}-\\d{2}[A-H]"
+            + "|(?:AJ|S|A|R)?DS\\d{2,3}-HDR\\d{2}-\\d{2}[A-H]"
+            + "|(?:AJ|S|A|R)?DS\\d{2,3}-BSKT\\d{2}-\\d{2}"
+            + "|(?:AJ|S|A|R)?DS\\d{2,3}-HOOK\\d{2}-\\d{2}[A-H]"
             + ")"
         );
     }
@@ -1419,32 +1425,32 @@ public class MainActivity extends AppCompatActivity {
             .toUpperCase(java.util.Locale.US)
             .replaceAll("\\s+", "");
 
-        /*
-         * First accept an already-valid location exactly as OCR read it.
-         */
+        /* Already valid — accept exactly as read */
         if(isLocation(normalized)){
             return normalized;
         }
 
         /*
-         * OCR commonly reads the digit '1' as the letter 'T'.
-         *
-         * Only correct T when it occupies a numeric position
-         * in the DSXXX section. The result must then pass the
+         * OCR commonly reads digit '1' as letter 'T'.
+         * Only correct T when it appears immediately after the
+         * region prefix AND the corrected value passes the
          * strict location validator.
          *
-         * Example:
-         * DST20-04-02-02C
-         *       ↓
-         * DS120-04-02-02C
+         *   DST20-04-02-02C   -> DS120-04-02-02C
+         *   AJDST20-04-02-02C -> AJDS120-04-02-02C
+         *   SDST20-04-02-02C  -> SDS120-04-02-02C
+         *   ADST20-04-02-02C  -> ADS120-04-02-02C
+         *   RDST20-04-02-02C  -> RDS120-04-02-02C
          */
-        if(normalized.matches(
-                "(?i)DST\\d{2}-\\d{2}-\\d{2}-\\d{2}[A-H]"
-        )){
-            String corrected = "DS1" + normalized.substring(3);
-
-            if(isLocation(corrected)){
-                return corrected;
+        String[] prefixes = { "AJDS", "SDS", "ADS", "RDS", "DS" };
+        for(String pfx : prefixes){
+            if(normalized.startsWith(pfx + "T")
+                    && normalized.length() > pfx.length() + 1){
+                String corrected = pfx + "1"
+                    + normalized.substring(pfx.length() + 1);
+                if(isLocation(corrected)){
+                    return corrected;
+                }
             }
         }
 
