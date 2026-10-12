@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
-    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; java.util.concurrent.ExecutorService qrExecutor = java.util.concurrent.Executors.newFixedThreadPool(2); boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,Product> products=new HashMap<>(); Product last;
+    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; java.util.concurrent.ExecutorService qrExecutor = java.util.concurrent.Executors.newFixedThreadPool(2); boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,List<Product>> products=new HashMap<>(); Product last;
 
     static class SlKlProduct {
         String gtin;
@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
                     java.nio.charset.StandardCharsets.UTF_8
                 );
 
-                Map<String,Product> importedProducts =
+                Map<String,List<Product>> importedProducts =
                     parseCatalog(s);
 
                 products.clear();
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
                     java.nio.charset.StandardCharsets.UTF_8
                 );
 
-                Map<String,Product> bundledProducts =
+                Map<String,List<Product>> bundledProducts =
                     parseCatalog(s);
 
                 products.clear();
@@ -398,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    Map<String,Product> parseCatalog(String json) throws Exception{
+    Map<String,List<Product>> parseCatalog(String json) throws Exception{
 
         JSONArray a = new JSONArray(json);
 
@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
             throw new Exception("Catalog is empty");
         }
 
-        Map<String,Product> parsed = new HashMap<>();
+        Map<String,List<Product>> parsed = new HashMap<>();
 
         for(int i=0;i<a.length();i++){
 
@@ -436,7 +436,12 @@ public class MainActivity extends AppCompatActivity {
             p.gtin = gtin;
             p.wms = wms;
 
-            parsed.put(gtin,p);
+            List<Product> bucket = parsed.get(gtin);
+            if(bucket == null){
+                bucket = new java.util.ArrayList<>();
+                parsed.put(gtin, bucket);
+            }
+            bucket.add(p);
         }
 
         return parsed;
@@ -493,7 +498,7 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
-            Map<String,Product> newProducts =
+            Map<String,List<Product>> newProducts =
                 parseCatalog(json);
 
             File destination =
@@ -1267,12 +1272,12 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        for(Product product : products.values()){
-
-            if(product.gtin != null
-                    && product.gtin.trim().equalsIgnoreCase(value)){
-
-                return true;
+        for(List<Product> bucket : products.values()){
+            for(Product product : bucket){
+                if(product.gtin != null
+                        && product.gtin.trim().equalsIgnoreCase(value)){
+                    return true;
+                }
             }
         }
 
@@ -1286,12 +1291,12 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        for(Product product : products.values()){
-
-            if(product.wms != null
-                    && product.wms.trim().equalsIgnoreCase(value)){
-
-                return true;
+        for(List<Product> bucket : products.values()){
+            for(Product product : bucket){
+                if(product.wms != null
+                        && product.wms.trim().equalsIgnoreCase(value)){
+                    return true;
+                }
             }
         }
 
@@ -1515,6 +1520,107 @@ public class MainActivity extends AppCompatActivity {
         resultScroll.post(() -> resultScroll.requestFocus());
     }
 
+
+    void addWmsResultCard(final Product p){
+
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(18,18,18,18);
+        card.setBackgroundResource(R.drawable.glow_card);
+
+        TextView title = new TextView(this);
+        title.setText("WMS BARCODE");
+        title.setTextColor(Color.parseColor("#A855F7"));
+        title.setTextSize(17);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setGravity(android.view.Gravity.CENTER);
+        card.addView(title);
+
+        TextView qrBadge = new TextView(this);
+        qrBadge.setText("QR GENERATED");
+        qrBadge.setTextColor(Color.BLACK);
+        qrBadge.setTextSize(15);
+        qrBadge.setTypeface(null, android.graphics.Typeface.BOLD);
+        qrBadge.setGravity(android.view.Gravity.CENTER);
+        qrBadge.setPadding(16,10,16,10);
+        qrBadge.setBackgroundResource(R.drawable.glow_button);
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+        bp.gravity = android.view.Gravity.CENTER;
+        bp.setMargins(0,10,0,10);
+        card.addView(qrBadge, bp);
+
+        final TextView wmsValue = new TextView(this);
+        wmsValue.setText(p.wms);
+        wmsValue.setTextColor(Color.WHITE);
+        wmsValue.setTextSize(16);
+        wmsValue.setGravity(android.view.Gravity.CENTER);
+        wmsValue.setPadding(0,10,0,6);
+        card.addView(wmsValue);
+
+        TextView partner = new TextView(this);
+        partner.setText("Partner ID :  "
+            + (p.partner == null || p.partner.isEmpty() ? "\u2014" : p.partner));
+        partner.setTextColor(Color.parseColor("#A855F7"));
+        partner.setTextSize(14);
+        partner.setTypeface(null, android.graphics.Typeface.BOLD);
+        partner.setGravity(android.view.Gravity.CENTER);
+        partner.setPadding(0,0,0,10);
+        card.addView(partner);
+
+        final ImageView image = new ImageView(this);
+        int qrSide = (int)(280 * getResources()
+                              .getDisplayMetrics().density);
+        LinearLayout.LayoutParams imgParams =
+            new LinearLayout.LayoutParams(qrSide, qrSide);
+        imgParams.setMargins(20, 16, 20, 16);
+        imgParams.gravity = android.view.Gravity.CENTER;
+        image.setLayoutParams(imgParams);
+        image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        image.setBackgroundColor(Color.WHITE);
+        card.addView(image);
+
+        final String wmsVal = p.wms;
+        qrExecutor.submit(() -> {
+            try{
+                final Bitmap bmp = makeQr(wmsVal, 600);
+                runOnUiThread(() -> image.setImageBitmap(bmp));
+            }catch(final Exception ex){
+                runOnUiThread(() -> status.setText(
+                    "QR error: " + ex.getMessage()));
+            }
+        });
+
+        LinearLayout actions = createActionRow(
+            () -> editValueDialog(
+                "Edit WMS",
+                p.wms,
+                newValue -> {
+                    if(newValue == null || newValue.isEmpty()) return;
+                    p.wms = newValue;
+                    wmsValue.setText(newValue);
+                    final String nv = newValue;
+                    qrExecutor.submit(() -> {
+                        try{
+                            final Bitmap bmp = makeQr(nv, 600);
+                            runOnUiThread(() -> image.setImageBitmap(bmp));
+                        }catch(Exception ignored){}
+                    });
+                }
+            ),
+            () -> copyValue(p.wms),
+            () -> shareValue("WMS", p.wms)
+        );
+        card.addView(actions);
+
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+        cardParams.setMargins(0,0,0,24);
+
+        ocrQrContainer.addView(card, cardParams);
+    }
 
     void addOcrQrCard(String type, String value){
 
@@ -1844,9 +1950,9 @@ public class MainActivity extends AppCompatActivity {
 
         if(key.isEmpty())return;
 
-        Product p=products.get(key);
+        List<Product> list = products.get(key);
 
-        if(p==null){
+        if(list == null || list.isEmpty()){
             notFound.setText(
                 "Product not found\n\n" +
                 "No matching pbarcode_canonical was found in this catalog.\n\n" +
@@ -1856,8 +1962,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        last=p;
-        saveHistoryEntry("GTIN", p.gtin, "lookup");
+        last = list.get(0);
+        saveHistoryEntry("GTIN", list.get(0).gtin, "lookup");
         stopCamera();
         cameraCard.setVisibility(View.GONE);
         manualPanel.setVisibility(View.GONE);
@@ -1865,21 +1971,27 @@ public class MainActivity extends AppCompatActivity {
 
         resultTitle.setText("PRODUCT FOUND");
         slKlResultCard.setVisibility(View.GONE);
-        qrCard.setVisibility(View.VISIBLE);
+        qrCard.setVisibility(View.GONE);
+        qr.setVisibility(View.GONE);
+        ocrQrContainer.setVisibility(View.VISIBLE);
+        ocrQrContainer.removeAllViews();
+
         findViewById(R.id.saveButton).setVisibility(View.VISIBLE);
-        
 
         info.setText("");
         info.setVisibility(View.GONE);
 
-        addFeature1Actions(p);
+        TextView gtinHeader = new TextView(this);
+        gtinHeader.setText("GTIN :  " + list.get(0).gtin);
+        gtinHeader.setTextColor(Color.parseColor("#A855F7"));
+        gtinHeader.setTextSize(15);
+        gtinHeader.setTypeface(null, android.graphics.Typeface.BOLD);
+        gtinHeader.setGravity(android.view.Gravity.CENTER);
+        gtinHeader.setPadding(0, 0, 0, 16);
+        ocrQrContainer.addView(gtinHeader);
 
-        try{
-            qr.setVisibility(View.VISIBLE);
-            ocrQrContainer.setVisibility(View.GONE);
-            qr.setImageBitmap(makeQr(p.wms,800));
-        }catch(Exception e){
-            status.setText("QR error: "+e.getMessage());
+        for(Product prod : list){
+            addWmsResultCard(prod);
         }
 
         resultScroll.post(()->resultScroll.requestFocus());
