@@ -6,15 +6,20 @@
     android:layout_height="match_parent">
 
     <!-- MODE SELECTION -->
-    <LinearLayout
+    <ScrollView
         android:id="@+id/modeSelection"
-        android:orientation="vertical"
-        android:gravity="center"
         android:background="#111318"
-        android:padding="24dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/appLogo"
@@ -191,6 +196,7 @@
             android:layout_height="52dp"/>
 
     </LinearLayout>
+    </ScrollView>
 
     <!-- WMS HEADER -->
     <LinearLayout
