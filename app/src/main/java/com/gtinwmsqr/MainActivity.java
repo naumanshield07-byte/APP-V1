@@ -1984,7 +1984,7 @@ public class MainActivity extends AppCompatActivity {
         info.setVisibility(View.GONE);
         notFound.setVisibility(View.GONE);
         slKlResultCard.setVisibility(View.GONE);
-        qrCard.setVisibility(View.GONE);
+        qrCard.setVisibility(View.VISIBLE);
         qr.setVisibility(View.GONE);
         ocrQrContainer.setVisibility(View.VISIBLE);
         ocrQrContainer.removeAllViews();
