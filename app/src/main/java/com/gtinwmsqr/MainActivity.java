@@ -1971,7 +1971,7 @@ public class MainActivity extends AppCompatActivity {
 
         resultTitle.setText("PRODUCT FOUND");
         slKlResultCard.setVisibility(View.GONE);
-        qrCard.setVisibility(View.GONE);
+        qrCard.setVisibility(View.VISIBLE);
         qr.setVisibility(View.GONE);
         ocrQrContainer.setVisibility(View.VISIBLE);
         ocrQrContainer.removeAllViews();
