@@ -475,18 +475,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    String readStrSafe(org.json.JSONReader r){
-        try {
-            return r.nextString();
-        } catch(Exception e) {
-            try {
-                Object v = r.nextValue();
-                return v == null ? "" : String.valueOf(v);
-            } catch(Exception e2) {
-                return "";
-            }
-        }
-    }
 
 
 
