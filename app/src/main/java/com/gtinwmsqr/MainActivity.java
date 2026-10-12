@@ -1057,40 +1057,106 @@ public class MainActivity extends AppCompatActivity {
         voteLocations.clear();
     }
 
+    Bitmap preprocessForOcr(ImageProxy imageProxy){
+
+        try{
+            ImageProxy.PlaneProxy yPlane = imageProxy.getPlanes()[0];
+            java.nio.ByteBuffer buffer = yPlane.getBuffer();
+            int srcW = imageProxy.getWidth();
+            int srcH = imageProxy.getHeight();
+            int rowStride = yPlane.getRowStride();
+            int pixelStride = yPlane.getPixelStride();
+
+            /* Downscale to ~800px wide — plenty for OCR, much faster */
+            int step = Math.max(1, srcW / 800);
+            int dstW = srcW / step;
+            int dstH = srcH / step;
+
+            byte[] yData = new byte[buffer.remaining()];
+            buffer.get(yData);
+
+            /* Measure brightness in the central 50% of the frame */
+            long sum = 0; int cnt = 0;
+            int cx0 = srcW / 4, cx1 = 3 * srcW / 4;
+            int cy0 = srcH / 4, cy1 = 3 * srcH / 4;
+            for(int y = cy0; y < cy1; y += 4){
+                int rowStart = y * rowStride;
+                for(int x = cx0; x < cx1; x += 4){
+                    int idx = rowStart + x * pixelStride;
+                    if(idx < yData.length){
+                        sum += yData[idx] & 0xFF;
+                        cnt++;
+                    }
+                }
+            }
+            int avg = cnt > 0 ? (int)(sum / cnt) : 128;
+
+            /* Invert when the region is dark (white-on-black text) */
+            boolean invert = avg < 110;
+
+            /* Contrast stretch: push values out to black or white */
+            int[] pixels = new int[dstW * dstH];
+            for(int y = 0; y < dstH; y++){
+                int srcY = y * step;
+                int rowStart = srcY * rowStride;
+                for(int x = 0; x < dstW; x++){
+                    int srcX = x * step;
+                    int idx = rowStart + srcX * pixelStride;
+                    int v = (idx < yData.length) ? (yData[idx] & 0xFF) : 0;
+
+                    if(invert) v = 255 - v;
+
+                    /* Contrast stretch: below 60 -> 0, above 200 -> 255,
+                       otherwise stretch linearly. Helps with yellow/colored bg */
+                    if(v < 60)      v = 0;
+                    else if(v > 200) v = 255;
+                    else             v = (v - 60) * 255 / 140;
+
+                    pixels[y * dstW + x] = 0xFF000000 | (v << 16) | (v << 8) | v;
+                }
+            }
+
+            return Bitmap.createBitmap(pixels, dstW, dstH, Bitmap.Config.ARGB_8888);
+
+        }catch(Exception e){
+            return null;
+        }
+    }
+
     void startOcrAnalyzer(ImageAnalysis analysis){
         analysis.setAnalyzer(
             cameraExecutor,
             image -> {
 
-                InputImage imageInput = InputImage.fromMediaImage(
-                    image.getImage(),
-                    image.getImageInfo().getRotationDegrees()
-                );
+                final int rotation = image
+                    .getImageInfo().getRotationDegrees();
 
-                /*
-                 * STEP 1: Try the barcode decoder FIRST.
-                 * Barcodes are ~99.9% accurate - use them when available.
-                 * Any successfully decoded value is classified and
-                 * pushed into the same buffers that CAPTURE uses.
-                 */
-                scanner.process(imageInput)
+                /* Build a preprocessed grayscale bitmap for OCR:
+                 * invert dark backgrounds + stretch contrast, so
+                 * white-on-black and yellow-background text becomes
+                 * readable black-on-white text. */
+                final Bitmap preprocessed = preprocessForOcr(image);
+
+                InputImage barcodeImg = InputImage.fromMediaImage(
+                    image.getImage(), rotation);
+
+                scanner.process(barcodeImg)
                     .addOnSuccessListener(barcodes -> {
 
                         for(com.google.mlkit.vision.barcode.common.Barcode bc : barcodes){
-
                             String raw = bc.getRawValue();
                             if(raw == null || raw.trim().isEmpty()) continue;
 
                             String upper = raw.trim().toUpperCase(java.util.Locale.US);
 
-                            java.util.LinkedHashSet<String> bg =
-                                new java.util.LinkedHashSet<>();
-                            java.util.LinkedHashSet<String> bw =
-                                new java.util.LinkedHashSet<>();
-                            java.util.LinkedHashSet<String> bl =
-                                new java.util.LinkedHashSet<>();
+                            java.util.LinkedHashSet<String> bg = new java.util.LinkedHashSet<>();
+                            java.util.LinkedHashSet<String> bw = new java.util.LinkedHashSet<>();
+                            java.util.LinkedHashSet<String> bl = new java.util.LinkedHashSet<>();
 
-                            classifyOcrLine(upper, bg, bw, bl);
+                            boolean _savedBypass = bypassGtinChecksum;
+                            bypassGtinChecksum = true;
+                            try { classifyOcrLine(upper, bg, bw, bl); }
+                            finally { bypassGtinChecksum = _savedBypass; }
 
                             if(!bg.isEmpty() || !bw.isEmpty()){
                                 ocrDetected = true;
@@ -1112,84 +1178,76 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .addOnCompleteListener(bcTask -> {
 
-                        /*
-                         * STEP 2: Now run OCR on the SAME frame for
-                         * Location labels and any text the barcode
-                         * decoder couldn't read.
-                         */
-                        textRecognizer.process(imageInput)
+                        /* OCR path — run on the preprocessed bitmap */
+                        final InputImage ocrImg = (preprocessed != null)
+                            ? InputImage.fromBitmap(preprocessed, 0)
+                            : InputImage.fromMediaImage(
+                                image.getImage(), rotation);
+
+                        textRecognizer.process(ocrImg)
                             .addOnSuccessListener(result -> {
 
-                        long now = System.currentTimeMillis();
-                        if(ocrDetected && now - lastOcrUpdate < 300){
-                            image.close();
-                            return;
-                        }
-                        lastOcrUpdate = now;
-
-                        java.util.LinkedHashSet<String> gtins =
-                            new java.util.LinkedHashSet<>();
-
-                        java.util.LinkedHashSet<String> wmsCodes =
-                            new java.util.LinkedHashSet<>();
-
-                        java.util.LinkedHashSet<String> locations =
-                            new java.util.LinkedHashSet<>();
-
-                        for(Text.TextBlock block : result.getTextBlocks()){
-
-                            for(Text.Line line : block.getLines()){
-
-                                String lineText = line.getText();
-
-                                if(lineText == null || lineText.trim().isEmpty()){
-                                    continue;
+                                long now = System.currentTimeMillis();
+                                if(ocrDetected && now - lastOcrUpdate < 300){
+                                    image.close();
+                                    return;
                                 }
+                                lastOcrUpdate = now;
 
-                                classifyOcrLine(
-                                    lineText,
-                                    gtins,
-                                    wmsCodes,
-                                    locations
-                                );
-                            }
-                        }
+                                java.util.LinkedHashSet<String> gtins =
+                                    new java.util.LinkedHashSet<>();
+                                java.util.LinkedHashSet<String> wmsCodes =
+                                    new java.util.LinkedHashSet<>();
+                                java.util.LinkedHashSet<String> locations =
+                                    new java.util.LinkedHashSet<>();
 
-                        if(!gtins.isEmpty()
-                                || !wmsCodes.isEmpty()
-                                || !locations.isEmpty()){
+                                for(Text.TextBlock block : result.getTextBlocks()){
+                                    for(Text.Line line : block.getLines()){
+                                        String lineText = line.getText();
+                                        if(lineText == null || lineText.trim().isEmpty()) continue;
 
-                            ocrDetected = true;
-
-                            runOnUiThread(() -> {
-                                for(String g : gtins){
-                                    if(vote(voteGtins, g)){
-                                        bufferedGtins.add(g);
+                                        classifyOcrLine(
+                                            lineText,
+                                            gtins,
+                                            wmsCodes,
+                                            locations
+                                        );
                                     }
                                 }
-                                for(String w : wmsCodes){
-                                    if(vote(voteWms, w)){
-                                        bufferedWms.add(w);
-                                    }
+
+                                if(!gtins.isEmpty()
+                                        || !wmsCodes.isEmpty()
+                                        || !locations.isEmpty()){
+
+                                    ocrDetected = true;
+
+                                    runOnUiThread(() -> {
+                                        for(String g : gtins){
+                                            if(vote(voteGtins, g)){
+                                                bufferedGtins.add(g);
+                                            }
+                                        }
+                                        for(String w : wmsCodes){
+                                            if(vote(voteWms, w)){
+                                                bufferedWms.add(w);
+                                            }
+                                        }
+                                        for(String l : locations){
+                                            bufferedLocations.add(l);
+                                        }
+
+                                        int total = bufferedGtins.size()
+                                            + bufferedWms.size()
+                                            + bufferedLocations.size();
+
+                                        status.setText(
+                                            "Buffered: " + total
+                                            + " item(s) - tap CAPTURE to commit"
+                                        );
+                                    });
                                 }
-                                for(String l : locations){
-                                    /* Locations have strict patterns — no voting needed */
-                                    bufferedLocations.add(l);
-                                }
 
-                                int total = bufferedGtins.size()
-                                    + bufferedWms.size()
-                                    + bufferedLocations.size();
-
-                                status.setText(
-                                    "Buffered: " + total
-                                    + " item(s) - tap CAPTURE to commit"
-                                );
-                            });
-                        }
-
-                        image.close();
-
+                                image.close();
                             })
                             .addOnFailureListener(e -> image.close());
                     });
