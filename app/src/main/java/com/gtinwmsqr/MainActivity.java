@@ -76,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
     java.util.HashMap<String,Integer> voteLocations = new java.util.HashMap<>();
     static final int VOTE_THRESHOLD = 2;
     volatile long lastOcrUpdate = 0L;
+    volatile long lastAnalyzerTime = 0L;
+    volatile boolean captureInProgress = false;
     String manualButtonOriginalText = null;
     static class HistoryEntry {
         String type;    // "GTIN" | "WMS" | "LOCATION"
@@ -268,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void openScannerMode(){
+        captureInProgress=false;
+        lastAnalyzerTime = 0L;
         ocrDetected=false;
         bufferedGtins.clear();
         bufferedWms.clear();
@@ -628,6 +632,7 @@ public class MainActivity extends AppCompatActivity {
 
                 analysis=new ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setTargetResolution(new android.util.Size(1280, 720))
                     .build();
 
                 if(textQrMode){
@@ -1011,6 +1016,8 @@ public class MainActivity extends AppCompatActivity {
 
     void captureOcrResults(){
 
+        captureInProgress = true;
+
         if(bufferedGtins.isEmpty()
                 && bufferedWms.isEmpty()
                 && bufferedLocations.isEmpty()){
@@ -1127,6 +1134,14 @@ public class MainActivity extends AppCompatActivity {
         analysis.setAnalyzer(
             cameraExecutor,
             image -> {
+
+                /* Skip frame entirely if user is capturing or throttling */
+                long _now = System.currentTimeMillis();
+                if(captureInProgress || (_now - lastAnalyzerTime) < 300){
+                    image.close();
+                    return;
+                }
+                lastAnalyzerTime = _now;
 
                 final int rotation = image
                     .getImageInfo().getRotationDegrees();
