@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
     boolean ocrDetected=false; boolean torchOn=false; androidx.camera.core.Camera activeCamera; PreviewView preview; TextView status, info, notFound, resultTitle; EditText input; Button scanBtn; ImageView qr; LinearLayout manualPanel; FrameLayout cameraCard; ScrollView resultScroll; ImageButton flashButton;
-    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; LinearLayout modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; java.util.concurrent.ExecutorService qrExecutor = java.util.concurrent.Executors.newFixedThreadPool(2); boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,List<Product>> products=new HashMap<>(); Product last;
+    ImageView captureShutter; Button manualButton; View wmsModeButton; View textQrModeButton; View slKlModeButton; Button changeModeButton; Button importCatalogButton; View modeSelection; ImageAnalysis analysis; boolean textQrMode=false; boolean bypassGtinChecksum=false; java.util.concurrent.ExecutorService qrExecutor = java.util.concurrent.Executors.newFixedThreadPool(2); boolean slKlMode=false; BarcodeScanner scanner; ExecutorService cameraExecutor = Executors.newSingleThreadExecutor(); Map<String,List<Product>> products=new HashMap<>(); Product last;
 
     static class SlKlProduct {
         String gtin;
