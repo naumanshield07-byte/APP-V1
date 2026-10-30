@@ -39,9 +39,53 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <!-- FEATURE 4: full-width scanner above the four existing cards -->
+        <LinearLayout
+            android:id="@+id/barcodeQrModeButton"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/menu_card"
+            android:layout_marginTop="36dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:padding="18dp"
+            android:minHeight="88dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@drawable/ic_menu_scanner"
+                android:contentDescription="Barcode to QR scanner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginStart="18dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="SCANNER"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="17sp"
+                    android:letterSpacing="0.06"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="BARCODE → QR"
+                    android:textColor="#A855F7"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
         <GridLayout
             android:columnCount="2"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -61,12 +105,12 @@
 
                 <ImageView
                     android:src="@drawable/ic_menu_scanner"
-                    android:contentDescription="SCANNER"
+                    android:contentDescription="WMS SCANNER"
                     android:layout_width="52dp"
                     android:layout_height="52dp"/>
 
                 <TextView
-                    android:text="SCANNER"
+                    android:text="WMS SCANNER"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="13sp"

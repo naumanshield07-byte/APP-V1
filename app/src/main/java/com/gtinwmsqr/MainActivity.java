@@ -36,6 +36,9 @@ import org.json.JSONArray; import org.json.JSONObject;
 import java.io.*; import java.util.*; import java.util.concurrent.*; import java.time.LocalDate; import java.time.format.DateTimeFormatter; import java.time.temporal.ChronoUnit;
 
 public class MainActivity extends AppCompatActivity {
+    FeatureFour featureFour;
+    int barcodeSession = 0;
+
     static final int REQ=1001;
     static final int CATALOG_REQUEST=2001;
     TextRecognizer textRecognizer;
@@ -206,12 +209,15 @@ public class MainActivity extends AppCompatActivity {
         changeModeButton=findViewById(R.id.changeModeButton);
         importCatalogButton=findViewById(R.id.importCatalogButton);
 
+        featureFour = new FeatureFour(this);
+        findViewById(R.id.barcodeQrModeButton).setOnClickListener(v -> featureFour.enter());
+
         changeModeButton.setOnClickListener(v->showModeScreen());
         importCatalogButton.setOnClickListener(v->openCatalogPicker());
 
-        wmsModeButton.setOnClickListener(v->{textQrMode=false;slKlMode=false;openScannerMode();});
-        textQrModeButton.setOnClickListener(v->{textQrMode=true;slKlMode=false;openScannerMode();});
-        slKlModeButton.setOnClickListener(v->{textQrMode=false;slKlMode=true;openScannerMode();});
+        wmsModeButton.setOnClickListener(v->{featureFour.active=false;textQrMode=false;slKlMode=false;openScannerMode();});
+        textQrModeButton.setOnClickListener(v->{featureFour.active=false;textQrMode=true;slKlMode=false;openScannerMode();});
+        slKlModeButton.setOnClickListener(v->{featureFour.active=false;textQrMode=false;slKlMode=true;openScannerMode();});
 
         findViewById(R.id.findButton).setOnClickListener(v->{
             if(slKlMode){
@@ -252,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
         notFound.setTextColor(Color.parseColor("#A855F7"));
     }
     void showModeScreen(){
+        if(featureFour != null){ featureFour.active=false; featureFour.restore(); }
         stopCamera();
         if(captureShutter != null){
             captureShutter.setVisibility(View.GONE);
@@ -270,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void openScannerMode(){
+        featureFour.restore();
         captureInProgress=false;
         lastAnalyzerTime = 0L;
         ocrDetected=false;
@@ -306,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
         ocrQrContainer.removeAllViews();
         slKlResultCard.setVisibility(View.GONE);
         qrCard.setVisibility(View.VISIBLE);
+        featureFour.scannerLabels();
 
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},REQ);
@@ -505,6 +514,8 @@ public class MainActivity extends AppCompatActivity {
             data
         );
 
+        if(featureFour.handleSaveResult(requestCode, resultCode, data)) return;
+
         if(requestCode != CATALOG_REQUEST
                 || resultCode != RESULT_OK
                 || data == null
@@ -620,12 +631,15 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        final int session = ++barcodeSession;
         ListenableFuture<ProcessCameraProvider> f =
             ProcessCameraProvider.getInstance(this);
 
         f.addListener(()->{
             try{
                 ProcessCameraProvider cp=f.get();
+                if(session != barcodeSession || isDestroyed()
+                        || cameraCard.getVisibility() != View.VISIBLE) return;
 
                 Preview p=new Preview.Builder().build();
                 p.setSurfaceProvider(preview.getSurfaceProvider());
@@ -641,29 +655,32 @@ public class MainActivity extends AppCompatActivity {
                     analysis.setAnalyzer(
                         cameraExecutor,
                         image->{
-                            InputImage ii=InputImage.fromMediaImage(
-                                image.getImage(),
-                                image.getImageInfo().getRotationDegrees()
-                            );
-
-                            scanner.process(ii)
-                                .addOnSuccessListener(bs->{
-                                    for(com.google.mlkit.vision.barcode.common.Barcode x:bs){
-                                        String v=x.getRawValue();
-
-                                        if(v!=null&&!v.isEmpty()){
-                                            runOnUiThread(()->{
-                                                if(slKlMode){
+                            if(image.getImage() == null){ image.close(); return; }
+                            try{
+                                InputImage ii=InputImage.fromMediaImage(
+                                    image.getImage(), image.getImageInfo().getRotationDegrees());
+                                scanner.process(ii)
+                                    .addOnSuccessListener(bs->{
+                                        if(session != barcodeSession || isDestroyed()
+                                                || cameraCard.getVisibility() != View.VISIBLE) return;
+                                        for(com.google.mlkit.vision.barcode.common.Barcode x:bs){
+                                            String v=x.getRawValue();
+                                            if(v!=null&&!v.isEmpty()){
+                                                if(featureFour.active){
+                                                    featureFour.showValue(v, true);
+                                                }else if(slKlMode){
                                                     findSlKl(v);
                                                 }else{
                                                     find(v);
                                                 }
-                                            });
-                                            break;
+                                                break;
+                                            }
                                         }
-                                    }
-                                })
-                                .addOnCompleteListener(x->image.close());
+                                    })
+                                    .addOnCompleteListener(x->image.close());
+                            }catch(Exception e){
+                                image.close();
+                            }
                         }
                     );
                 }
@@ -678,7 +695,9 @@ public class MainActivity extends AppCompatActivity {
                 );
 
                 status.setText(
-                    textQrMode
+                    featureFour.active
+                        ? "Camera ready — scan any barcode to generate its QR."
+                        : textQrMode
                         ? "OCR camera ready — point at the GTIN text."
                         : slKlMode
                             ? "Camera ready — scan the product GTIN for SL/KL."
@@ -2074,7 +2093,7 @@ public class MainActivity extends AppCompatActivity {
         status.setText("OCR detected: " + cleaned.replace("\\n"," | "));
     }
 
-    void stopCamera(){try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
+    void stopCamera(){barcodeSession++;try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
     void showProductionDatePicker(){
         if(currentSlKlList == null || currentSlKlList.isEmpty()) return;
 
@@ -2621,6 +2640,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy(){
+        if(featureFour != null){ featureFour.active=false; featureFour.restore(); }
         stopCamera();
 
         try{
