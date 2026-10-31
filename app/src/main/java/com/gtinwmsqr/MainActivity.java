@@ -2102,6 +2102,7 @@ public class MainActivity extends AppCompatActivity {
         android.app.DatePickerDialog dialog =
             new android.app.DatePickerDialog(
                 this,
+                R.style.SlKlDatePickerTheme,
                 (view, year, month, dayOfMonth) -> {
                     try{
                         slKlPickedDate = java.time.LocalDate.of(

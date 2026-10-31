@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SlKlDatePickerTheme"
+        parent="android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">#7C3AED</item>
+        <item name="android:colorBackground">#FAFAFA</item>
+        <item name="android:windowBackground">#FAFAFA</item>
+        <item name="android:textColorPrimary">#111318</item>
+        <item name="android:textColorSecondary">#475569</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>
