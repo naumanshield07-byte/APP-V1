@@ -42,11 +42,12 @@
         <!-- FEATURE 4: full-width scanner above the four existing cards -->
         <LinearLayout
             android:id="@+id/barcodeQrModeButton"
-            android:orientation="horizontal"
+            android:elevation="6dp"
+            android:orientation="vertical"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/glow_button"
+            android:background="@drawable/scanner_feature_card"
             android:layout_marginTop="24dp"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
@@ -57,12 +58,12 @@
             <ImageView
                 android:src="@drawable/ic_menu_scanner"
                 android:contentDescription="Barcode to QR scanner"
-                android:layout_width="48dp"
-                android:layout_height="48dp"/>
+                android:layout_width="64dp"
+                android:layout_height="64dp"/>
             <LinearLayout
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginStart="18dp"
+                android:layout_marginTop="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <TextView
@@ -91,6 +92,7 @@
 
             <LinearLayout
                 android:id="@+id/wmsModeButton"
+            android:elevation="6dp"
                 android:orientation="vertical"
                 android:gravity="center"
                 android:clickable="true"
@@ -122,6 +124,7 @@
 
             <LinearLayout
                 android:id="@+id/textQrModeButton"
+            android:elevation="6dp"
                 android:orientation="vertical"
                 android:gravity="center"
                 android:clickable="true"
@@ -153,6 +156,7 @@
 
             <LinearLayout
                 android:id="@+id/slKlModeButton"
+            android:elevation="6dp"
                 android:orientation="vertical"
                 android:gravity="center"
                 android:clickable="true"
@@ -184,6 +188,7 @@
 
             <LinearLayout
                 android:id="@+id/historyButton"
+            android:elevation="6dp"
                 android:orientation="vertical"
                 android:gravity="center"
                 android:clickable="true"
