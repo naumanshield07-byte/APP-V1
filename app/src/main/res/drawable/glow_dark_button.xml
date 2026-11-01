@@ -1,21 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <gradient android:type="linear" android:angle="270"
-                android:startColor="#1F2230"
-                android:endColor="#0A0B10"/>
-            <stroke android:width="1.5dp" android:color="#A855F7"/>
-            <corners android:radius="18dp"/>
-        </shape>
-    </item>
-    <item android:top="2dp" android:left="6dp" android:right="6dp"
-          android:bottom="24dp">
-        <shape android:shape="rectangle">
-            <gradient android:type="linear" android:angle="270"
-                android:startColor="#33A855F7"
-                android:endColor="#00A855F7"/>
-            <corners android:radius="14dp"/>
-        </shape>
-    </item>
-</layer-list>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#267DD3DA"><item><shape android:shape="rectangle"><solid android:color="#1B262B"/><stroke android:width="1dp" android:color="#34545A"/><corners android:radius="20dp"/></shape></item></ripple>

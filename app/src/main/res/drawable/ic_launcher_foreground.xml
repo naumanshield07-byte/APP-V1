@@ -4,22 +4,22 @@
     android:viewportWidth="108" android:viewportHeight="108">
 
     <!-- Outer purple neon glow -->
-    <path android:fillColor="#3D8B5CF6"
+    <path android:fillColor="#3D16B8B1"
         android:pathData="M36,22 L72,22 Q80,22 80,30 L80,78 Q80,86 72,86 L36,86 Q28,86 28,78 L28,30 Q28,22 36,22 Z"/>
 
     <!-- Badge body: near-black -->
-    <path android:fillColor="#0D0E15"
+    <path android:fillColor="#172125"
         android:pathData="M38,26 L70,26 Q78,26 78,34 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 L30,34 Q30,26 38,26 Z"/>
 
     <!-- Barcode: purple -> blue -> cyan gradient effect -->
-    <path android:fillColor="#A855F7" android:pathData="M38,44 L41,44 L41,68 L38,68 Z"/>
-    <path android:fillColor="#8B5CF6" android:pathData="M45,44 L48,44 L48,68 L45,68 Z"/>
-    <path android:fillColor="#5C6EF0" android:pathData="M52,44 L56,44 L56,68 L52,68 Z"/>
-    <path android:fillColor="#3B82F6" android:pathData="M60,44 L63,44 L63,68 L60,68 Z"/>
-    <path android:fillColor="#06B6D4" android:pathData="M67,44 L70,44 L70,68 L67,68 Z"/>
+    <path android:fillColor="#16BE83" android:pathData="M38,44 L41,44 L41,68 L38,68 Z"/>
+    <path android:fillColor="#16B8B1" android:pathData="M45,44 L48,44 L48,68 L45,68 Z"/>
+    <path android:fillColor="#20A9C5" android:pathData="M52,44 L56,44 L56,68 L52,68 Z"/>
+    <path android:fillColor="#4275EC" android:pathData="M60,44 L63,44 L63,68 L60,68 Z"/>
+    <path android:fillColor="#4275EC" android:pathData="M67,44 L70,44 L70,68 L67,68 Z"/>
 
     <!-- Inner rim: soft purple -->
-    <path android:strokeColor="#A855F7" android:strokeWidth="1.5"
+    <path android:strokeColor="#16BE83" android:strokeWidth="1.5"
         android:fillColor="#00000000"
         android:pathData="M38,26 L70,26 Q78,26 78,34 L78,74 Q78,82 70,82 L38,82 Q30,82 30,74 L30,34 Q30,26 38,26 Z"/>
 </vector>

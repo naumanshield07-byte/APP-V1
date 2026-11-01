@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#111318"
+    android:background="#101719"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <!-- MODE SELECTION -->
     <ScrollView
         android:id="@+id/modeSelection"
-        android:background="#111318"
+        android:background="#101719"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -26,12 +26,12 @@
             android:src="@drawable/app_logo"
             android:contentDescription="QR Generator logo"
             android:scaleType="fitCenter"
-            android:layout_width="180dp"
-            android:layout_height="180dp"/>
+            android:layout_width="96dp"
+            android:layout_height="96dp"/>
 
         <com.gtinwmsqr.MetallicTextView
-            android:text="T  O  O  L  S"
-            android:textSize="44sp"
+            android:text="TOOLS"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:letterSpacing="0.18"
             android:gravity="center"
@@ -46,8 +46,8 @@
             android:gravity="center"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/menu_card"
-            android:layout_marginTop="36dp"
+            android:background="@drawable/glow_button"
+            android:layout_marginTop="24dp"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="18dp"
@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"/>
                 <TextView
                     android:text="BARCODE → QR"
-                    android:textColor="#A855F7"
+                    android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:layout_marginTop="4dp"
                     android:layout_width="wrap_content"
@@ -222,7 +222,7 @@
             android:textStyle="bold"
             android:letterSpacing="0.12"
             android:gravity="center"
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="24dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -237,7 +237,7 @@
             android:minHeight="52dp"
             android:layout_marginTop="18dp"
             android:layout_width="match_parent"
-            android:layout_height="52dp"/>
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
     </ScrollView>
@@ -248,7 +248,7 @@
         android:gravity="center_vertical"
         android:paddingStart="18dp"
         android:paddingEnd="12dp"
-        android:background="#111318"
+        android:background="#101719"
         android:layout_width="match_parent"
         android:layout_height="64dp">
 
@@ -282,7 +282,7 @@
             android:src="@android:drawable/ic_menu_camera"
             android:contentDescription="Toggle flashlight"
             android:background="@android:color/transparent"
-            android:tint="#A855F7"
+            android:tint="#16BE83"
             android:padding="10dp"
             android:layout_width="52dp"
             android:layout_height="52dp"/>
@@ -291,7 +291,7 @@
     <!-- CAMERA / SCANNER -->
     <FrameLayout
         android:id="@+id/cameraCard"
-        android:background="#111318"
+        android:background="#101719"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -320,7 +320,7 @@
             android:layout_margin="12dp"
             android:elevation="6dp"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"/>
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/cameraHint"
@@ -329,7 +329,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="#111318"
+            android:background="#101719"
             android:padding="12dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="82dp"
@@ -342,7 +342,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="#111318"
+            android:background="#101719"
             android:padding="8dp"
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
@@ -360,7 +360,7 @@
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp"
                 android:layout_width="wrap_content"
-                android:layout_height="52dp"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </FrameLayout>
 
@@ -370,7 +370,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="12dp"
-        android:background="#111318"
+        android:background="#101719"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -378,13 +378,13 @@
         <EditText
             android:id="@+id/gtinInput"
             android:hint="Enter / paste GTIN"
-            android:textColorHint="#A855F7"
+            android:textColorHint="#16BE83"
             android:textColor="#FFFFFF"
             android:inputType="number"
             android:singleLine="true"
             android:textSize="17sp"
             android:padding="12dp"
-            android:background="#111318"
+            android:background="#101719"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="56dp"/>
@@ -399,22 +399,23 @@
             android:minHeight="52dp"
             android:layout_marginStart="10dp"
             android:layout_width="92dp"
-            android:layout_height="52dp"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <!-- RESULT CARD -->
     <ScrollView
         android:id="@+id/resultScroll"
         android:fillViewport="true"
-        android:background="#111318"
+        android:background="#101719"
         android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:orientation="vertical"
             android:padding="16dp"
-            android:background="#111318"
+            android:background="#101719"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -773,15 +774,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-                <ImageView
+                <com.gtinwmsqr.ResponsiveQrView
                     android:id="@+id/qrImage"
                     android:adjustViewBounds="true"
                     android:layout_gravity="center"
                     android:layout_marginTop="12dp"
                     android:background="#FFFFFF"
                     android:padding="8dp"
-                    android:layout_width="340dp"
-                    android:layout_height="340dp"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
                 <LinearLayout
                     android:id="@+id/ocrQrContainer"
@@ -808,7 +809,7 @@
                     android:minHeight="56dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"/>
+                    android:layout_height="wrap_content"/>
 
                 
             </LinearLayout>
@@ -824,7 +825,7 @@
                 android:minHeight="56dp"
                 android:layout_marginTop="12dp"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"/>
+                android:layout_height="wrap_content"/>
 
             <!-- SUCCESS / ERROR STATUS -->
             <TextView
@@ -836,7 +837,7 @@
                 android:visibility="gone"
                 android:layout_marginTop="14dp"
                 android:padding="16dp"
-                android:background="#111318"
+                android:background="#101719"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -851,7 +852,7 @@
         android:textSize="12sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:background="#111318"
+        android:background="#101719"
         android:padding="6dp"
         android:layout_width="match_parent"
         android:layout_height="32dp"/>

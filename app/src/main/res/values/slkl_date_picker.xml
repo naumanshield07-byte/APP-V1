@@ -1,12 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="SlKlDatePickerTheme"
-        parent="android:style/Theme.Material.Light.Dialog.Alert">
-        <item name="android:colorAccent">#7C3AED</item>
-        <item name="android:colorBackground">#FAFAFA</item>
-        <item name="android:windowBackground">#FAFAFA</item>
-        <item name="android:textColorPrimary">#111318</item>
-        <item name="android:textColorSecondary">#475569</item>
-        <item name="android:forceDarkAllowed">false</item>
-    </style>
+<style name="SlKlDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+ <item name="colorPrimary">#7DD3DA</item>
+ <item name="colorOnPrimary">#07383D</item>
+ <item name="colorSurface">#242A2C</item>
+ <item name="colorSurfaceContainerHigh">#242A2C</item>
+ <item name="colorOnSurface">#DDE3E5</item>
+ <item name="colorOnSurfaceVariant">#BEC8CB</item>
+ <item name="android:textColorPrimary">#DDE3E5</item>
+ <item name="android:textColorSecondary">#BEC8CB</item>
+ <item name="android:forceDarkAllowed">false</item>
+ <item name="materialCalendarStyle">@style/PremiumCalendar</item>
+ <item name="buttonBarPositiveButtonStyle">@style/PremiumCalendarAction</item>
+ <item name="buttonBarNegativeButtonStyle">@style/PremiumCalendarAction</item>
+</style>
+<style name="PremiumCalendar" parent="Widget.Material3.MaterialCalendar">
+ <item name="backgroundTint">#242A2C</item>
+ <item name="shapeAppearance">@style/PremiumCalendarShape</item>
+</style>
+<style name="PremiumCalendarShape" parent="ShapeAppearance.Material3.Corner.Large">
+ <item name="cornerSize">28dp</item>
+</style>
+<style name="PremiumCalendarAction" parent="Widget.Material3.Button.TextButton.Dialog">
+ <item name="android:textColor">#7DD3DA</item>
+ <item name="android:textAllCaps">false</item>
+</style>
 </resources>

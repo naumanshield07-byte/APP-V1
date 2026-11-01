@@ -110,7 +110,7 @@ final class FeatureFour {
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(dp(18), dp(18), dp(18), dp(18));
         panel.setBackgroundResource(R.drawable.glow_card);
-        TextView title = label("GENERATING QR", 21, Color.parseColor("#A855F7"));
+        TextView title = label("GENERATING QR", 21, Color.parseColor("#16BE83"));
         panel.addView(title);
         panel.addView(label("SCANNED BARCODE", 13, Color.WHITE));
         TextView content = label(value, 17, Color.WHITE);

@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             gtin=g; wms=w; partner=pa; status=s;
         }
     }
-    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();loadCatalog();loadSlKlCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
+    @Override public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_main);bind();PremiumUi.install(this);loadCatalog();loadSlKlCatalog();scanner=BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS).build());
         textRecognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
         showModeScreen();}
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         slKlShelfLifeDateValue=findViewById(R.id.slKlShelfLifeDateValue);
         slKlKeepLifeDateValue=findViewById(R.id.slKlKeepLifeDateValue);
         slKlRemainingValue=findViewById(R.id.slKlRemainingValue);
-        slKlRemainingValue.setTextColor(Color.parseColor("#A855F7"));
+        slKlRemainingValue.setTextColor(Color.parseColor("#16BE83"));
         slKlRemainingValue.setTextSize(18);
         slKlRemainingValue.setTypeface(null, android.graphics.Typeface.BOLD);
         slKlStatusValue=findViewById(R.id.slKlStatusValue);
@@ -253,9 +253,9 @@ public class MainActivity extends AppCompatActivity {
              if(hb != null) hb.setOnClickListener(v -> openHistory());
         }catch(Exception ignored){}
 
-        resultTitle.setTextColor(Color.parseColor("#A855F7"));
-        info.setTextColor(Color.parseColor("#A855F7"));
-        notFound.setTextColor(Color.parseColor("#A855F7"));
+        resultTitle.setTextColor(Color.parseColor("#16BE83"));
+        info.setTextColor(Color.parseColor("#16BE83"));
+        notFound.setTextColor(Color.parseColor("#16BE83"));
     }
     void showModeScreen(){
         if(featureFour != null){ featureFour.active=false; featureFour.restore(); }
@@ -738,7 +738,7 @@ public class MainActivity extends AppCompatActivity {
 
         historyPanel = new LinearLayout(this);
         historyPanel.setOrientation(LinearLayout.VERTICAL);
-        historyPanel.setBackgroundColor(Color.parseColor("#111318"));
+        historyPanel.setBackgroundColor(Color.parseColor("#101719"));
         historyPanel.setVisibility(View.GONE);
 
         /* Header row */
@@ -746,7 +746,7 @@ public class MainActivity extends AppCompatActivity {
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(android.view.Gravity.CENTER_VERTICAL);
         header.setPadding(16, 16, 16, 16);
-        header.setBackgroundColor(Color.parseColor("#111318"));
+        header.setBackgroundColor(Color.parseColor("#101719"));
 
         Button backBtn = new Button(this);
         backBtn.setText("\u2190");
@@ -758,7 +758,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText("HISTORY");
-        title.setTextColor(Color.parseColor("#A855F7"));
+        title.setTextColor(Color.parseColor("#16BE83"));
         title.setTextSize(22);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
@@ -901,7 +901,7 @@ public class MainActivity extends AppCompatActivity {
         if(historyEntries.isEmpty()){
             TextView empty = new TextView(this);
             empty.setText("No history yet.\n\nScanned and OCR-detected values will appear here.");
-            empty.setTextColor(Color.parseColor("#A855F7"));
+            empty.setTextColor(Color.parseColor("#16BE83"));
             empty.setTextSize(15);
             empty.setGravity(android.view.Gravity.CENTER);
             empty.setPadding(20, 80, 20, 20);
@@ -923,10 +923,10 @@ public class MainActivity extends AppCompatActivity {
             box.setPadding(30, 30, 30, 30);
             box.setGravity(android.view.Gravity.CENTER);
 
-            ImageView iv = new ImageView(this);
+            ImageView iv = new ResponsiveQrView(this);
             int side = (int)(260 * getResources().getDisplayMetrics().density);
             LinearLayout.LayoutParams ip =
-                new LinearLayout.LayoutParams(side, side);
+                new LinearLayout.LayoutParams(-1, -2);
             iv.setLayoutParams(ip);
             iv.setImageBitmap(bmp);
             iv.setBackgroundColor(Color.WHITE);
@@ -975,7 +975,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView t = new TextView(this);
         t.setText(he.type);
-        t.setTextColor(Color.parseColor("#A855F7"));
+        t.setTextColor(Color.parseColor("#16BE83"));
         t.setTextSize(12);
         t.setTypeface(null, android.graphics.Typeface.BOLD);
         t.setLetterSpacing(0.1f);
@@ -1001,7 +1001,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView viewQr = new TextView(this);
         viewQr.setText("VIEW QR");
-        viewQr.setTextColor(Color.parseColor("#A855F7"));
+        viewQr.setTextColor(Color.parseColor("#16BE83"));
         viewQr.setTextSize(11);
         viewQr.setTypeface(null, android.graphics.Typeface.BOLD);
         viewQr.setLetterSpacing(0.1f);
@@ -1715,7 +1715,7 @@ public class MainActivity extends AppCompatActivity {
         String keepDateStr  = "—";
         String remainStr    = "—";
         String statusStr    = "—";
-        int    statusColor  = Color.parseColor("#A855F7");
+        int    statusColor  = Color.parseColor("#16BE83");
 
         java.time.format.DateTimeFormatter fmt =
             java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -1766,7 +1766,7 @@ public class MainActivity extends AppCompatActivity {
 
                 TextView l = new TextView(this);
                 l.setText(label);
-                l.setTextColor(Color.parseColor("#A855F7"));
+                l.setTextColor(Color.parseColor("#16BE83"));
                 l.setTextSize(14);
                 l.setTypeface(null, android.graphics.Typeface.BOLD);
                 row.addView(l,
@@ -1808,7 +1808,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView sl = new TextView(this);
         sl.setText("STATUS");
-        sl.setTextColor(Color.parseColor("#A855F7"));
+        sl.setTextColor(Color.parseColor("#16BE83"));
         sl.setTextSize(14);
         sl.setTypeface(null, android.graphics.Typeface.BOLD);
         statusRow.addView(sl,
@@ -1840,7 +1840,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText("WMS BARCODE");
-        title.setTextColor(Color.parseColor("#A855F7"));
+        title.setTextColor(Color.parseColor("#16BE83"));
         title.setTextSize(17);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
@@ -1872,18 +1872,18 @@ public class MainActivity extends AppCompatActivity {
         TextView partner = new TextView(this);
         partner.setText("Partner ID :  "
             + (p.partner == null || p.partner.isEmpty() ? "\u2014" : p.partner));
-        partner.setTextColor(Color.parseColor("#A855F7"));
+        partner.setTextColor(Color.parseColor("#16BE83"));
         partner.setTextSize(14);
         partner.setTypeface(null, android.graphics.Typeface.BOLD);
         partner.setGravity(android.view.Gravity.CENTER);
         partner.setPadding(0,0,0,10);
         card.addView(partner);
 
-        final ImageView image = new ImageView(this);
+        final ImageView image = new ResponsiveQrView(this);
         int qrSide = (int)(280 * getResources()
                               .getDisplayMetrics().density);
         LinearLayout.LayoutParams imgParams =
-            new LinearLayout.LayoutParams(qrSide, qrSide);
+            new LinearLayout.LayoutParams(-1, -2);
         imgParams.setMargins(20, 16, 20, 16);
         imgParams.gravity = android.view.Gravity.CENTER;
         image.setLayoutParams(imgParams);
@@ -1941,7 +1941,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView title = new TextView(this);
         title.setText(type);
-        title.setTextColor(Color.parseColor("#A855F7"));
+        title.setTextColor(Color.parseColor("#16BE83"));
         title.setTextSize(17);
         title.setTypeface(null,android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
@@ -1953,14 +1953,14 @@ public class MainActivity extends AppCompatActivity {
         content.setGravity(android.view.Gravity.CENTER);
         content.setPadding(0,10,0,10);
 
-        ImageView image = new ImageView(this);
+        ImageView image = new ResponsiveQrView(this);
 
         /* Square QR tile - 320dp on each side, centered. */
         int qrSide = (int)(320 * getResources()
                               .getDisplayMetrics().density);
 
         LinearLayout.LayoutParams imgParams =
-            new LinearLayout.LayoutParams(qrSide, qrSide);
+            new LinearLayout.LayoutParams(-1, -2);
 
         imgParams.setMargins(20, 16, 20, 16);
         imgParams.gravity = android.view.Gravity.CENTER;
@@ -2096,29 +2096,32 @@ public class MainActivity extends AppCompatActivity {
     void stopCamera(){barcodeSession++;try{if(analysis!=null)analysis.clearAnalyzer(); if(activeCamera!=null)activeCamera.getCameraControl().enableTorch(false);}catch(Exception ignored){}activeCamera=null;analysis=null;status.setText("Camera stopped.");}
     void showProductionDatePicker(){
         if(currentSlKlList == null || currentSlKlList.isEmpty()) return;
-
-        java.util.Calendar today = java.util.Calendar.getInstance();
-
-        android.app.DatePickerDialog dialog =
-            new android.app.DatePickerDialog(
-                this,
-                R.style.SlKlDatePickerTheme,
-                (view, year, month, dayOfMonth) -> {
-                    try{
-                        slKlPickedDate = java.time.LocalDate.of(
-                            year, month + 1, dayOfMonth);
-                        renderSlKlCards();
-                    }catch(Exception e){
-                        status.setText("Invalid date");
-                    }
-                },
-                today.get(java.util.Calendar.YEAR),
-                today.get(java.util.Calendar.MONTH),
-                today.get(java.util.Calendar.DAY_OF_MONTH)
-            );
-
-        dialog.setTitle("SELECT PRODUCTION DATE");
-        dialog.show();
+        if(getSupportFragmentManager().findFragmentByTag("production-date") != null) return;
+        View focused = getCurrentFocus();
+        if(focused != null){
+            android.view.inputmethod.InputMethodManager keyboard =
+                (android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+            if(keyboard != null) keyboard.hideSoftInputFromWindow(focused.getWindowToken(), 0);
+            focused.clearFocus();
+        }
+        java.time.LocalDate initial = slKlPickedDate != null
+            ? slKlPickedDate : java.time.LocalDate.now();
+        // MaterialDatePicker uses UTC midnight. Do not interpret it in the device zone.
+        long selected = initial.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
+        com.google.android.material.datepicker.MaterialDatePicker<Long> picker =
+            com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
+                .setTheme(R.style.SlKlDatePickerTheme)
+                .setTitleText("Select Date")
+                .setPositiveButtonText("OK")
+                .setNegativeButtonText("Cancel")
+                .setSelection(selected)
+                .build();
+        picker.addOnPositiveButtonClickListener(value -> {
+            slKlPickedDate = java.time.Instant.ofEpochMilli(value)
+                .atZone(java.time.ZoneOffset.UTC).toLocalDate();
+            renderSlKlCards();
+        });
+        picker.show(getSupportFragmentManager(), "production-date");
     }
 
     void findSlKl(String v){
@@ -2174,7 +2177,7 @@ public class MainActivity extends AppCompatActivity {
         /* GTIN header */
         TextView gtinHeader = new TextView(this);
         gtinHeader.setText("GTIN :  " + key);
-        gtinHeader.setTextColor(Color.parseColor("#A855F7"));
+        gtinHeader.setTextColor(Color.parseColor("#16BE83"));
         gtinHeader.setTextSize(15);
         gtinHeader.setTypeface(null, android.graphics.Typeface.BOLD);
         gtinHeader.setGravity(android.view.Gravity.CENTER);
@@ -2266,7 +2269,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView gtinHeader = new TextView(this);
         gtinHeader.setText("GTIN :  " + list.get(0).gtin);
-        gtinHeader.setTextColor(Color.parseColor("#A855F7"));
+        gtinHeader.setTextColor(Color.parseColor("#16BE83"));
         gtinHeader.setTextSize(15);
         gtinHeader.setTypeface(null, android.graphics.Typeface.BOLD);
         gtinHeader.setGravity(android.view.Gravity.CENTER);
@@ -2292,7 +2295,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView edit = new TextView(this);
         edit.setText("✎  EDIT");
-        edit.setTextColor(Color.parseColor("#A855F7"));
+        edit.setTextColor(Color.parseColor("#16BE83"));
         edit.setTextSize(15);
         edit.setTypeface(null,android.graphics.Typeface.BOLD);
         edit.setGravity(android.view.Gravity.CENTER);
@@ -2302,7 +2305,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView copy = new TextView(this);
         copy.setText("⧉  COPY");
-        copy.setTextColor(Color.parseColor("#A855F7"));
+        copy.setTextColor(Color.parseColor("#16BE83"));
         copy.setTextSize(15);
         copy.setTypeface(null,android.graphics.Typeface.BOLD);
         copy.setGravity(android.view.Gravity.CENTER);
@@ -2330,7 +2333,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView share = new TextView(this);
         share.setText("⤴  SHARE");
-        share.setTextColor(Color.parseColor("#A855F7"));
+        share.setTextColor(Color.parseColor("#16BE83"));
         share.setTextSize(15);
         share.setTypeface(null,android.graphics.Typeface.BOLD);
         share.setGravity(android.view.Gravity.CENTER);

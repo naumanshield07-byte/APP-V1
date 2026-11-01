@@ -1,18 +1,31 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-<style name="Theme.GTINWMSQR" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-    <item name="android:fontFamily">sans</item>
-    <item name="android:colorAccent">#A855F7</item>
-    <item name="android:colorBackground">#111318</item>
-    <item name="colorPrimary">#A855F7</item>
-    <item name="colorPrimaryVariant">#A855F7</item>
-    <item name="colorOnPrimary">#000000</item>
-    <item name="colorSecondary">#A855F7</item>
-    <item name="colorSecondaryVariant">#A855F7</item>
-    <item name="colorOnSecondary">#000000</item>
-    <item name="colorSurface">#101010</item>
-    <item name="colorOnSurface">#A855F7</item>
-    <item name="android:navigationBarColor">#000000</item>
-    <item name="android:statusBarColor">#000000</item>
-    <item name="android:windowLightStatusBar">false</item>
+<resources>
+<style name="Theme.GTINWMSQR" parent="Theme.Material3.Dark.NoActionBar">
+ <item name="android:fontFamily">sans</item>
+ <item name="android:colorAccent">#7DD3DA</item>
+ <item name="android:colorBackground">#101719</item>
+ <item name="android:windowBackground">#101719</item>
+ <item name="colorPrimary">#7DD3DA</item>
+ <item name="colorOnPrimary">#07383D</item>
+ <item name="colorPrimaryContainer">#17464B</item>
+ <item name="colorOnPrimaryContainer">#C8F8FC</item>
+ <item name="colorSecondary">#16BE83</item>
+ <item name="colorOnSecondary">#06251B</item>
+ <item name="colorSurface">#1B262B</item>
+ <item name="colorOnSurface">#E4EAEB</item>
+ <item name="colorOnSurfaceVariant">#BEC8CB</item>
+ <item name="android:textColorPrimary">#E4EAEB</item>
+ <item name="android:textColorSecondary">#BEC8CB</item>
+ <item name="android:statusBarColor">#101719</item>
+ <item name="android:navigationBarColor">#101719</item>
+ <item name="android:windowLightStatusBar">false</item>
+ <item name="android:windowLightNavigationBar">false</item>
+ <item name="android:forceDarkAllowed">false</item>
+ <item name="android:alertDialogTheme">@style/PremiumPlatformDialog</item>
+</style>
+<style name="PremiumPlatformDialog" parent="android:style/Theme.Material.Dialog.Alert">
+ <item name="android:colorAccent">#7DD3DA</item>
+ <item name="android:colorBackground">#242A2C</item>
+ <item name="android:textColorPrimary">#E4EAEB</item>
+ <item name="android:textColorSecondary">#BEC8CB</item>
 </style>
 </resources>

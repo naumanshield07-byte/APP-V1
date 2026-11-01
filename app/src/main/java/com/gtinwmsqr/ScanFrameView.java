@@ -46,7 +46,7 @@ public class ScanFrameView extends View {
         float len = dp(42);
 
         /* Top-left */
-        frame.setColor(0xFF06B6D4);
+        frame.setColor(0xFF4275EC);
         frame.setStrokeWidth(dp(4));
         c.drawLine(l, t, l + len, t, frame);
         c.drawLine(l, t, l, t + len, frame);
