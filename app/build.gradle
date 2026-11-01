@@ -1,7 +1,26 @@
 plugins { id 'com.android.application' }
 
 android { namespace 'com.gtinwmsqr'; compileSdk 35
-    defaultConfig { applicationId 'com.gtinwmsqr.feature4test'; minSdk 23; targetSdk 35; versionCode 1; versionName '1.0' }
+    defaultConfig { applicationId 'com.gtinwmsqr.tools'; minSdk 23; targetSdk 35; versionCode 1; versionName '1.0' }
+    signingConfigs {
+        release {
+            def releasePath = System.getenv("TOOLS_KEYSTORE_PATH")
+            if (releasePath) {
+                storeFile file(releasePath)
+                storePassword System.getenv("TOOLS_STORE_PASSWORD")
+                keyAlias System.getenv("TOOLS_KEY_ALIAS")
+                keyPassword System.getenv("TOOLS_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            debuggable false
+        }
+    }
 }
 
 dependencies {
